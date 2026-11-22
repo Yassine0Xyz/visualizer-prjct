@@ -9,7 +9,9 @@ class AudioEngine {
   final AudioPlayer _player = AudioPlayer(
     // Offload scheduling can starve position updates on some devices when
     // combined with per-frame polling; keep it simple and reliable.
-    androidOffloadSchedulingEnabled: false,
+    androidAudioOffloadPreferences: const AndroidAudioOffloadPreferences(
+      audioOffloadMode: AndroidAudioOffloadMode.disabled,
+    ),
   );
 
   Stream<bool> get playingStream => _player.playingStream;

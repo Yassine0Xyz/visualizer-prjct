@@ -41,7 +41,7 @@ class HomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: scheme.primary.withOpacity(0.45),
+                              color: scheme.primary.withValues(alpha: 0.45),
                               blurRadius: 24,
                               offset: const Offset(0, 8),
                             ),
@@ -82,7 +82,7 @@ class HomeScreen extends StatelessWidget {
                           width: 56,
                           height: 56,
                           decoration: BoxDecoration(
-                            color: scheme.primary.withOpacity(0.18),
+                            color: scheme.primary.withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: controller.isLoading
@@ -152,7 +152,7 @@ class HomeScreen extends StatelessWidget {
                                 Text(
                                   'Continue session',
                                   style: TextStyle(
-                                    color: scheme.primary.withOpacity(0.9),
+                                    color: scheme.primary.withValues(alpha: 0.9),
                                     fontSize: 12.5,
                                   ),
                                 ),
@@ -242,8 +242,8 @@ class _GlassCard extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            color: (tint ?? Colors.white).withOpacity(tint == null ? 0.05 : 0.08),
-            border: Border.all(color: Colors.white.withOpacity(0.09)),
+            color: (tint ?? Colors.white).withValues(alpha: tint == null ? 0.05 : 0.08),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
           ),
           child: child,
         ),
@@ -277,12 +277,12 @@ class _StyleCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             color: selected
-                ? scheme.primary.withOpacity(0.14)
-                : Colors.white.withOpacity(0.04),
+                ? scheme.primary.withValues(alpha: 0.14)
+                : Colors.white.withValues(alpha: 0.04),
             border: Border.all(
               color: selected
-                  ? scheme.primary.withOpacity(0.7)
-                  : Colors.white.withOpacity(0.08),
+                  ? scheme.primary.withValues(alpha: 0.7)
+                  : Colors.white.withValues(alpha: 0.08),
             ),
           ),
           child: Column(

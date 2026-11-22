@@ -29,7 +29,7 @@ class BarsPainter extends VisualizerPainter {
         canvas.drawRRect(
           rect,
           Paint()
-            ..color = color.withOpacity(0.55)
+            ..color = color.withValues(alpha: 0.55)
             ..maskFilter = MaskFilter.blur(BlurStyle.normal, config.glowRadius),
         );
       }
@@ -47,7 +47,7 @@ class BarsPainter extends VisualizerPainter {
     // Subtle baseline.
     canvas.drawRect(
       Rect.fromLTWH(0, size.height - 1.5, size.width, 1.5),
-      Paint()..color = Colors.white.withOpacity(0.08),
+      Paint()..color = Colors.white.withValues(alpha: 0.08),
     );
   }
 }

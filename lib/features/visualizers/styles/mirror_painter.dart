@@ -21,7 +21,7 @@ class MirrorPainter extends VisualizerPainter {
       canvas.drawRect(
         Rect.fromLTWH(0, centerY - 1, size.width, 2),
         Paint()
-          ..color = colorAt(0.5).withOpacity(0.6)
+          ..color = colorAt(0.5).withValues(alpha: 0.6)
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, config.glowRadius),
       );
     }
@@ -45,13 +45,13 @@ class MirrorPainter extends VisualizerPainter {
 
       if (config.glow) {
         final blur = Paint()
-          ..color = color.withOpacity(0.45)
+          ..color = color.withValues(alpha: 0.45)
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, config.glowRadius);
         canvas.drawRRect(top, blur);
         canvas.drawRRect(bottom, blur);
       }
       canvas.drawRRect(top, Paint()..color = color);
-      canvas.drawRRect(bottom, Paint()..color = color.withOpacity(0.75));
+      canvas.drawRRect(bottom, Paint()..color = color.withValues(alpha: 0.75));
     }
   }
 }

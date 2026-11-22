@@ -41,7 +41,7 @@ class GeometricPainter extends VisualizerPainter {
         canvas.drawPath(
           path,
           Paint()
-            ..color = color.withOpacity(0.4)
+            ..color = color.withValues(alpha: 0.4)
             ..style = PaintingStyle.stroke
             ..strokeWidth = 5
             ..maskFilter = MaskFilter.blur(BlurStyle.normal, config.glowRadius),

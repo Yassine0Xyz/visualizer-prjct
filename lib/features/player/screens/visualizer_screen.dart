@@ -45,7 +45,7 @@ class VisualizerScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFF0C0C15),
                   border: Border(
-                    top: BorderSide(color: Colors.white.withOpacity(0.07)),
+                    top: BorderSide(color: Colors.white.withValues(alpha: 0.07)),
                   ),
                 ),
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
@@ -189,7 +189,7 @@ class VisualizerScreen extends StatelessWidget {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .primary
-                                            .withOpacity(0.5),
+                                            .withValues(alpha: 0.5),
                                         blurRadius: 24,
                                         offset: const Offset(0, 8),
                                       ),
@@ -287,8 +287,8 @@ class _RoundButton extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withOpacity(onPressed == null ? 0.03 : 0.08),
-          border: Border.all(color: Colors.white.withOpacity(0.09)),
+          color: Colors.white.withValues(alpha: onPressed == null ? 0.03 : 0.08),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
         ),
         child: Icon(icon, size: small ? 20 : 24,
             color: onPressed == null ? Colors.white24 : Colors.white),

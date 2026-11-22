@@ -57,7 +57,7 @@ class _FullscreenVisualizerScreenState extends State<FullscreenVisualizerScreen>
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.center,
-                      colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+                      colors: [Colors.black.withValues(alpha: 0.6), Colors.transparent],
                     ),
                   ),
                   padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
@@ -104,7 +104,7 @@ class _FullscreenVisualizerScreenState extends State<FullscreenVisualizerScreen>
                         child: Text(
                           'Double-tap screen or tap ✕ to exit fullscreen',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.35),
+                            color: Colors.white.withValues(alpha: 0.35),
                             fontSize: 12,
                           ),
                         ),

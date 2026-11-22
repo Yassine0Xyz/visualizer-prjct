@@ -35,7 +35,7 @@ class WavePainter extends VisualizerPainter {
     canvas.drawPath(
       echoPath,
       Paint()
-        ..color = colorAt(0.5).withOpacity(0.25)
+        ..color = colorAt(0.5).withValues(alpha: 0.25)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2
         ..maskFilter = config.glow ? MaskFilter.blur(BlurStyle.normal, config.glowRadius * 0.5) : null,
@@ -50,8 +50,8 @@ class WavePainter extends VisualizerPainter {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            colorAt(0.35).withOpacity(0.35),
-            colorAt(0.8).withOpacity(0.02),
+            colorAt(0.35).withValues(alpha: 0.35),
+            colorAt(0.8).withValues(alpha: 0.02),
           ],
         ).createShader(Offset.zero & size),
     );

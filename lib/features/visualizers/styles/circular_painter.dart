@@ -23,7 +23,7 @@ class CircularPainter extends VisualizerPainter {
       center,
       baseR * 0.86,
       Paint()
-        ..color = colorAt(0.5).withOpacity(0.35)
+        ..color = colorAt(0.5).withValues(alpha: 0.35)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
     );
@@ -31,7 +31,7 @@ class CircularPainter extends VisualizerPainter {
     canvas.drawCircle(
       center,
       baseR * (0.45 + data.bass * 0.25),
-      glowingPaint(colorAt(0.1, ).withOpacity(0.9)),
+      glowingPaint(colorAt(0.1, ).withValues(alpha: 0.9)),
     );
 
     final strokeWidth = (math.pi * baseR / n) * 0.55;
@@ -53,7 +53,7 @@ class CircularPainter extends VisualizerPainter {
           p0,
           p1,
           Paint()
-            ..color = color.withOpacity(0.5)
+            ..color = color.withValues(alpha: 0.5)
             ..strokeWidth = strokeWidth * 1.8
             ..maskFilter = MaskFilter.blur(BlurStyle.normal, config.glowRadius),
         );

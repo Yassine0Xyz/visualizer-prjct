@@ -23,7 +23,7 @@ class ColumnsPainter extends VisualizerPainter {
     final blockW = cellW * 0.62;
     final blockH = cellH * 0.58;
 
-    final dimPaint = Paint()..color = Colors.white.withOpacity(0.05);
+    final dimPaint = Paint()..color = Colors.white.withValues(alpha: 0.05);
 
     for (var c = 0; c < cols; c++) {
       // Sample the 48-band spectrum into 24 columns.
@@ -47,14 +47,14 @@ class ColumnsPainter extends VisualizerPainter {
             canvas.drawRRect(
               rect,
               Paint()
-                ..color = color.withOpacity(0.5)
+                ..color = color.withValues(alpha: 0.5)
                 ..maskFilter = MaskFilter.blur(BlurStyle.normal, config.glowRadius * 0.6),
             );
           }
           canvas.drawRRect(
             rect,
             Paint()
-              ..color = color.withOpacity(0.45 + 0.55 * (fromBottom + 1) / _rows),
+              ..color = color.withValues(alpha: 0.45 + 0.55 * (fromBottom + 1) / _rows),
           );
         } else {
           canvas.drawRRect(

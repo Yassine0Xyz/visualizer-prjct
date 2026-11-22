@@ -38,8 +38,8 @@ class RadialPainter extends VisualizerPainter {
       Paint()
         ..shader = RadialGradient(
           colors: [
-            colorAt(0.1).withOpacity(0.55),
-            colorAt(0.7).withOpacity(0.15),
+            colorAt(0.1).withValues(alpha: 0.55),
+            colorAt(0.7).withValues(alpha: 0.15),
           ],
         ).createShader(Offset.zero & size),
     );
@@ -54,7 +54,7 @@ class RadialPainter extends VisualizerPainter {
     canvas.drawPath(
       Path()..addPolygon(inner, true),
       Paint()
-        ..color = colorAt(0.8).withOpacity(0.35)
+        ..color = colorAt(0.8).withValues(alpha: 0.35)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
     );

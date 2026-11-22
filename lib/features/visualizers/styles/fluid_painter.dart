@@ -46,8 +46,8 @@ class FluidPainter extends VisualizerPainter {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              colorAt(0.15 + t * 0.6).withOpacity(0.28),
-              colorAt(0.3 + t * 0.6).withOpacity(0.03),
+              colorAt(0.15 + t * 0.6).withValues(alpha: 0.28),
+              colorAt(0.3 + t * 0.6).withValues(alpha: 0.03),
             ],
           ).createShader(rect),
       );

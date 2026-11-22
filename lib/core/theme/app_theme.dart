@@ -30,7 +30,7 @@ abstract final class AppTheme {
 BoxDecoration glassDecoration({double radius = 24, Color? tint}) {
   return BoxDecoration(
     borderRadius: BorderRadius.circular(radius),
-    color: (tint ?? Colors.white).withOpacity(0.06),
-    border: Border.all(color: Colors.white.withOpacity(0.09)),
+    color: (tint ?? Colors.white).withValues(alpha: 0.06),
+    border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
   );
 }

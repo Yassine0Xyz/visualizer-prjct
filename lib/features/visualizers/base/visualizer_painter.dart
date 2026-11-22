@@ -36,7 +36,7 @@ abstract class VisualizerPainter extends CustomPainter {
     final aura = Paint()
       ..shader = RadialGradient(
         colors: [
-          theme.colorAt(0.5, energy: data.energy).withOpacity(0.10 + data.energy * 0.12),
+          theme.colorAt(0.5, energy: data.energy).withValues(alpha: 0.10 + data.energy * 0.12),
           Colors.transparent,
         ],
       ).createShader(rect)
