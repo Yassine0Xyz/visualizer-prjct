@@ -65,16 +65,12 @@ class VisualizerView extends StatefulWidget {
 class _VisualizerViewState extends State<VisualizerView>
     with SingleTickerProviderStateMixin {
   late final Ticker _ticker;
-  late VisualizerPainter _painter;
 
   @override
   void initState() {
     super.initState();
-    _painter = createPainter(widget.style, widget.data, widget.config, widget.theme);
     _ticker = createTicker((_) {
       widget.onTick();
-      // Rebind in case config/theme objects were swapped by the controller.
-      _painter = createPainter(widget.style, widget.data, widget.config, widget.theme);
     })..start();
   }
 

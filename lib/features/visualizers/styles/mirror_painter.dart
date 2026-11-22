@@ -32,13 +32,15 @@ class MirrorPainter extends VisualizerPainter {
       final x = i * slot + (slot - barWidth) / 2;
       final color = colorAt(i / (n - 1));
 
-      final top = RRect.fromRectAndRadius(
+      final top = RRect.fromRectAndCorners(
         Rect.fromLTWH(x, centerY - h - 2, barWidth, h),
-        Radius.vertical(top: Radius.circular(barWidth / 2)),
+        topLeft: Radius.circular(barWidth / 2),
+        topRight: Radius.circular(barWidth / 2),
       );
-      final bottom = RRect.fromRectAndRadius(
+      final bottom = RRect.fromRectAndCorners(
         Rect.fromLTWH(x, centerY + 2, barWidth, h * 0.92),
-        Radius.vertical(bottom: Radius.circular(barWidth / 2)),
+        bottomLeft: Radius.circular(barWidth / 2),
+        bottomRight: Radius.circular(barWidth / 2),
       );
 
       if (config.glow) {

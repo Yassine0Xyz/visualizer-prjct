@@ -127,7 +127,7 @@ class HomeScreen extends StatelessWidget {
                   if (controller.hasTrack)
                     _GlassCard(
                       onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
+                        MaterialPageRoute<void>(
                           builder: (_) => VisualizerScreen(controller: controller),
                         ),
                       ),
@@ -191,7 +191,7 @@ class HomeScreen extends StatelessWidget {
                             controller.selectStyle(s);
                             if (controller.hasTrack) {
                               Navigator.of(context).push(
-                                MaterialPageRoute(
+                                MaterialPageRoute<void>(
                                   builder: (_) =>
                                       VisualizerScreen(controller: controller),
                                 ),

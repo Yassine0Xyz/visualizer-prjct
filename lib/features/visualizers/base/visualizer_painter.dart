@@ -1,5 +1,6 @@
 import 'dart:math' as math;
-import 'dart:ui';
+
+import 'package:flutter/material.dart';
 
 import '../visualizer_config.dart';
 import '../visualizer_data.dart';

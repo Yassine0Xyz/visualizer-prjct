@@ -4,6 +4,7 @@ import '../../visualizers/visualizer_style.dart';
 import '../../visualizers/visualizer_view.dart';
 import '../player_controller.dart';
 import 'fullscreen_visualizer_screen.dart';
+import 'settings_panel.dart';
 
 /// Main lab screen: the visualizer stage plus transport controls.
 class VisualizerScreen extends StatelessWidget {
@@ -252,7 +253,7 @@ class VisualizerScreen extends StatelessWidget {
 
   void _openFullscreen(BuildContext context) {
     Navigator.of(context).push(
-      PageRouteBuilder(
+      PageRouteBuilder<void>(
         opaque: true,
         transitionDuration: const Duration(milliseconds: 400),
         pageBuilder: (_, animation, __) => FadeTransition(

@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
 
 /// Color identity for visualizers. Colors are sampled along a gradient via
 /// [colorAt]; when [dynamicHue] is enabled the gradient slowly rotates with
