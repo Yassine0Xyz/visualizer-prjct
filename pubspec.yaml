@@ -1,0 +1,38 @@
+name: audio_visualizer_lab
+description: >-
+  A standalone, experimental audio visualizer laboratory. Import local audio,
+  play it, and explore a collection of genuinely audio-reactive visualizers
+  built with CustomPainter. Independent of any external project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Playback
+  just_audio: ^0.10.6
+
+  # PCM decoding for the offline FFT analysis pipeline.
+  # The `_audio` (LGPL) variant is used on purpose: it bundles only audio
+  # codecs (mp3, aac, opus, vorbis, ...) and keeps the app free of GPL
+  # contamination, which matters if visualizers are later shipped inside a
+  # proprietary player such as YAZEN Player.
+  ffmpeg_kit_flutter_audio: ^4.6.3
+
+  # Local file import
+  file_picker: ^10.0.0
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
