@@ -24,10 +24,28 @@ jobs:
         with:
           channel: stable
           cache: true
-          cache-dependency-path: pubspec.yaml
+          cache-key: ${{ runner.os }}-flutter-${{ hashFiles('pubspec.yaml') }}
 
       - name: Generate Android platform files
         run: flutter create --platforms=android --org com.yassine .
+
+      - name: Set FFmpeg Android minimum SDK
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          gradle = Path('android/app/build.gradle.kts')
+          text = gradle.read_text()
+          updated, count = re.subn(
+              r'minSdk\s*=\s*flutter\.minSdkVersion',
+              'minSdk = 24',
+              text,
+          )
+          if count != 1:
+              raise SystemExit(f'Expected one Flutter minSdk setting, found {count}')
+          gradle.write_text(updated)
+          PY
 
       - name: Install dependencies
         run: flutter pub get

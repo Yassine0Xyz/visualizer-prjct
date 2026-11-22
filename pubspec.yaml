@@ -18,11 +18,11 @@ dependencies:
   just_audio: ^0.10.6
 
   # PCM decoding for the offline FFT analysis pipeline.
-  # The `_audio` (LGPL) variant is used on purpose: it bundles only audio
+  # The maintained audio (LGPL) variant is used on purpose: it bundles only audio
   # codecs (mp3, aac, opus, vorbis, ...) and keeps the app free of GPL
   # contamination, which matters if visualizers are later shipped inside a
   # proprietary player such as YAZEN Player.
-  ffmpeg_kit_flutter_audio: ^4.6.3
+  ffmpeg_kit_flutter_new_audio: ^3.0.0
 
   # Local file import
   file_picker: ^10.0.0
