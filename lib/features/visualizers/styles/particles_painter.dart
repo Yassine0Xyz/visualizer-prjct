@@ -56,7 +56,7 @@ class ParticlesPainter extends VisualizerPainter {
       final pos = center + Offset(math.cos(angle), math.sin(angle)) * r;
       final dotSize = field.size[i] * (0.8 + band * 2.2 + data.energy);
       final color = colorAt(field.bandIndex[i] / (VisualizerData.bandCount - 1))
-          .withValues(alpha: (0.20 + band * 0.65).clamp(0.0, 1.0));
+          .withValues(alpha: (0.20 + band * 0.65).clamp(0.0, 1.0).toDouble());
 
       if (blurPaint != null && band > 0.25) {
         canvas.drawCircle(pos, dotSize * 2.2, blurPaint..color = color.withValues(alpha: 0.4));

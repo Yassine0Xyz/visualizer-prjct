@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-
 import '../../visualizers/visualizer_style.dart';
 import '../player_controller.dart';
 import 'visualizer_screen.dart';
 
-/// Landing screen: import audio, then jump into the visualizer lab.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.controller});
 
@@ -16,198 +14,232 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF0B0714), Color(0xFF07070D), Color(0xFF03100F)],
+            colors: [
+              Color(0xFF0A0818),
+              Color(0xFF050508),
+              Color(0xFF080C14),
+            ],
           ),
         ),
         child: SafeArea(
           child: AnimatedBuilder(
             animation: controller,
             builder: (context, _) {
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [scheme.primary, scheme.tertiary],
-                          ),
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: scheme.primary.withValues(alpha: 0.45),
-                              blurRadius: 24,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(Icons.graphic_eq_rounded, size: 28),
-                      ),
-                      const SizedBox(width: 16),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Visualizer Lab',
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            Text(
-                              'Audio-reactive visualizer research playground',
-                              style: TextStyle(color: Colors.white54, fontSize: 13),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 36),
-
-                  // Import card
-                  _GlassCard(
-                    onTap: controller.isLoading ? null : controller.importAudio,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: scheme.primary.withValues(alpha: 0.18),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: controller.isLoading
-                              ? const Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: CircularProgressIndicator(strokeWidth: 2.5),
-                                )
-                              : const Icon(Icons.upload_file_rounded, size: 28),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+              return CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 36, 24, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Text(
-                                controller.isLoading ? 'Working…' : 'Import audio',
-                                style: const TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w700,
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [scheme.primary, scheme.tertiary],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: scheme.primary.withValues(alpha: 0.50),
+                                      blurRadius: 30,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
                                 ),
+                                child: const Icon(Icons.graphic_eq_rounded, size: 30),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                controller.isLoading
-                                    ? controller.statusMessage
-                                    : 'Pick a local track to start experimenting',
-                                style: const TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 12.5,
+                              const SizedBox(width: 18),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Visualizer Lab',
+                                      style: TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -0.8,
+                                      ),
+                                    ),
+                                    Text(
+                                      'V2 · Premium Audio Reactive Visualizers',
+                                      style: TextStyle(
+                                        color: Colors.white45,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        const Icon(Icons.arrow_forward_ios_rounded,
-                            size: 16, color: Colors.white38),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+                          const SizedBox(height: 40),
 
-                  if (controller.hasTrack)
-                    _GlassCard(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => VisualizerScreen(controller: controller),
-                        ),
-                      ),
-                      tint: scheme.primary,
-                      child: Row(
-                        children: [
-                          const Icon(Icons.play_circle_fill_rounded, size: 40),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          // Import Card
+                          _GlassCard(
+                            onTap: controller.isLoading ? null : controller.importAudio,
+                            child: Row(
                               children: [
-                                Text(
-                                  controller.track!.title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 15.5,
-                                    fontWeight: FontWeight.w600,
+                                Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [scheme.primary.withValues(alpha: 0.3), scheme.tertiary.withValues(alpha: 0.2)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  child: controller.isLoading
+                                      ? const Padding(
+                                          padding: EdgeInsets.all(18),
+                                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                                        )
+                                      : const Icon(Icons.upload_file_rounded, size: 30),
+                                ),
+                                const SizedBox(width: 18),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        controller.isLoading ? 'Analyzing...' : 'Import Audio',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        controller.isLoading
+                                            ? controller.statusMessage
+                                            : 'Pick a local track to start experimenting',
+                                        style: const TextStyle(
+                                          color: Colors.white45,
+                                          fontSize: 12.5,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                Text(
-                                  'Continue session',
-                                  style: TextStyle(
-                                    color: scheme.primary.withValues(alpha: 0.9),
-                                    fontSize: 12.5,
-                                  ),
-                                ),
+                                const Icon(Icons.arrow_forward_ios_rounded,
+                                    size: 16, color: Colors.white30),
                               ],
                             ),
                           ),
+                          const SizedBox(height: 14),
+
+                          if (controller.hasTrack)
+                            _GlassCard(
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => VisualizerScreen(controller: controller),
+                                ),
+                              ),
+                              tint: scheme.primary,
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.play_circle_fill_rounded, size: 44),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          controller.track!.title,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Continue Session',
+                                          style: TextStyle(
+                                            color: scheme.primary.withValues(alpha: 0.85),
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          const SizedBox(height: 40),
+                          Text(
+                            '18 Visualizer Styles',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Each style has a unique identity — all driven by real FFT analysis.',
+                            style: TextStyle(color: Colors.white35, fontSize: 12.5),
+                          ),
+                          const SizedBox(height: 18),
                         ],
                       ),
                     ),
-
-                  const SizedBox(height: 36),
-                  const Text(
-                    'Visualizer styles',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                   ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Each style has its own identity — all driven by real FFT data.',
-                    style: TextStyle(color: Colors.white38, fontSize: 12.5),
-                  ),
-                  const SizedBox(height: 16),
 
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 1.35,
-                    children: [
-                      for (final s in VisualizerStyle.values)
-                        _StyleCard(
-                          style: s,
-                          selected: controller.style == s,
-                          onTap: () {
-                            controller.selectStyle(s);
-                            if (controller.hasTrack) {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) =>
-                                      VisualizerScreen(controller: controller),
-                                ),
-                              );
-                            } else {
-                              controller.importAudio();
-                            }
-                          },
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    sliver: SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 1.3,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final s = VisualizerStyle.values[index];
+                          return _StyleCard(
+                            style: s,
+                            selected: controller.style == s,
+                            onTap: () {
+                              controller.selectStyle(s);
+                              if (controller.hasTrack) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => VisualizerScreen(controller: controller),
+                                  ),
+                                );
+                              } else {
+                                controller.importAudio();
+                              }
+                            },
+                          );
+                        },
+                        childCount: VisualizerStyle.values.length,
+                      ),
+                    ),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: Center(
+                        child: Text(
+                          'Standalone experiment · no connection to any other project',
+                          style: TextStyle(color: Colors.white18, fontSize: 11),
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  const Center(
-                    child: Text(
-                      'Standalone experiment · no connection to any other project',
-                      style: TextStyle(color: Colors.white24, fontSize: 11.5),
+                      ),
                     ),
                   ),
                 ],
@@ -221,11 +253,7 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _GlassCard extends StatelessWidget {
-  const _GlassCard({
-    required this.child,
-    this.onTap,
-    this.tint,
-  });
+  const _GlassCard({required this.child, this.onTap, this.tint});
 
   final Widget child;
   final VoidCallback? onTap;
@@ -239,11 +267,18 @@ class _GlassCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(24),
         child: Ink(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            color: (tint ?? Colors.white).withValues(alpha: tint == null ? 0.05 : 0.08),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
+            color: (tint ?? Colors.white).withValues(alpha: tint == null ? 0.04 : 0.07),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: child,
         ),
@@ -253,11 +288,7 @@ class _GlassCard extends StatelessWidget {
 }
 
 class _StyleCard extends StatelessWidget {
-  const _StyleCard({
-    required this.style,
-    required this.selected,
-    required this.onTap,
-  });
+  const _StyleCard({required this.style, required this.selected, required this.onTap});
 
   final VisualizerStyle style;
   final bool selected;
@@ -272,17 +303,17 @@ class _StyleCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(14),
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             color: selected
-                ? scheme.primary.withValues(alpha: 0.14)
-                : Colors.white.withValues(alpha: 0.04),
+                ? scheme.primary.withValues(alpha: 0.12)
+                : Colors.white.withValues(alpha: 0.03),
             border: Border.all(
               color: selected
-                  ? scheme.primary.withValues(alpha: 0.7)
-                  : Colors.white.withValues(alpha: 0.08),
+                  ? scheme.primary.withValues(alpha: 0.6)
+                  : Colors.white.withValues(alpha: 0.06),
             ),
           ),
           child: Column(
@@ -290,20 +321,20 @@ class _StyleCard extends StatelessWidget {
             children: [
               Icon(
                 style.icon,
-                color: selected ? scheme.primary : Colors.white70,
-                size: 26,
+                color: selected ? scheme.primary : Colors.white60,
+                size: 28,
               ),
               const Spacer(),
               Text(
                 style.label,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
               ),
               const SizedBox(height: 3),
               Text(
                 style.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white38, fontSize: 10.5),
+                style: const TextStyle(color: Colors.white30, fontSize: 10.5),
               ),
             ],
           ),

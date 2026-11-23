@@ -1,4 +1,3 @@
-/// Immutable model describing a loaded audio file.
 class AudioTrack {
   const AudioTrack({
     required this.id,

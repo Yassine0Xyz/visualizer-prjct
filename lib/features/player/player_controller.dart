@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -15,8 +16,6 @@ import '../visualizers/visualizer_data.dart';
 import '../visualizers/visualizer_style.dart';
 import '../visualizers/visualizer_theme.dart';
 
-/// Central controller: owns the audio engine, the analysis result and the
-/// live [VisualizerData]. UI reads from it; it never imports UI widgets.
 class PlayerController extends ChangeNotifier {
   PlayerController({AnalysisBackend? backend})
       : _backend = backend ?? AnalysisBackend();
@@ -56,7 +55,7 @@ class PlayerController extends ChangeNotifier {
   Future<void> loadTrack(String path, {String? title}) async {
     isLoading = true;
     analysisFailed = false;
-    statusMessage = 'Decoding & analyzing audio…';
+    statusMessage = 'Decoding & analyzing audio...';
     notifyListeners();
 
     try {
@@ -98,15 +97,12 @@ class PlayerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ---- Playback controls -------------------------------------------------
-
   Future<void> play() async {
     if (track == null) return;
     await engine.play();
   }
 
   Future<void> pause() => engine.pause();
-
   Future<void> stop() async {
     await engine.stop();
     data.setStopped(true);
@@ -117,9 +113,6 @@ class PlayerController extends ChangeNotifier {
     pushFrameAt(position);
   }
 
-  // ---- Visualizer feed ---------------------------------------------------
-
-  /// Called every display frame by [VisualizerView]'s ticker.
   void tick() {
     if (_frames.isEmpty || track == null) return;
     pushFrameAt(engine.position);
@@ -129,9 +122,9 @@ class PlayerController extends ChangeNotifier {
     if (_frames.isEmpty) return;
     final t = position.inMilliseconds.toDouble();
     final idx = (t / _frameIntervalMs).clamp(0, _frames.length - 1).toDouble();
-    final i0 = idx.floor().clamp(0, _frames.length - 1);
-    final i1 = (i0 + 1).clamp(0, _frames.length - 1);
-    final frac = (idx - i0).clamp(0.0, 1.0);
+    final i0 = idx.floor().clamp(0, _frames.length - 1).toInt();
+    final i1 = (i0 + 1).clamp(0, _frames.length - 1).toInt();
+    final frac = (idx - i0).clamp(0.0, 1.0).toDouble();
 
     final f0 = _frames[i0];
     final f1 = _frames[i1];
@@ -149,20 +142,20 @@ class PlayerController extends ChangeNotifier {
       _softClip(_lerp(f0.mid, f1.mid, frac) * gain),
       _softClip(_lerp(f0.high, f1.high, frac) * gain),
       _softClip(_lerp(f0.energy, f1.energy, frac) * gain),
+      _softClip(_lerp(f0.bassEnergy, f1.bassEnergy, frac) * gain),
+      _softClip(_lerp(f0.midEnergy, f1.midEnergy, frac) * gain),
+      _softClip(_lerp(f0.highEnergy, f1.highEnergy, frac) * gain),
       config.smoothness,
     );
   }
 
   static double _lerp(double a, double b, double t) => a + (b - a) * t;
 
-  /// tanh soft-clip: punchy response at high sensitivity, never > 1.
   static double _softClip(double x) {
     if (x <= 0) return 0;
-    final v = x > 3 ? 1.0 : (x * (27 + x * x) / (27 + 9 * x * x)); // fast tanh
-    return v.clamp(0.0, 1.0);
+    final v = x > 3 ? 1.0 : (x * (27 + x * x) / (27 + 9 * x * x));
+    return v.clamp(0.0, 1.0).toDouble();
   }
-
-  // ---- Settings ----------------------------------------------------------
 
   void selectStyle(VisualizerStyle s) {
     style = s;

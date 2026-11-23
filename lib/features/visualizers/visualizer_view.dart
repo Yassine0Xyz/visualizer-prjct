@@ -3,21 +3,28 @@ import 'package:flutter/scheduler.dart';
 
 import 'base/visualizer_painter.dart';
 import 'styles/bars_painter.dart';
+import 'styles/bass_circle_painter.dart';
 import 'styles/circular_painter.dart';
+import 'styles/circular_wave_painter.dart';
 import 'styles/columns_painter.dart';
 import 'styles/fluid_painter.dart';
+import 'styles/fluid_bass_painter.dart';
+import 'styles/frequency_rings_painter.dart';
 import 'styles/geometric_painter.dart';
 import 'styles/mirror_painter.dart';
+import 'styles/neon_bars_painter.dart';
+import 'styles/particle_explosion_painter.dart';
 import 'styles/particles_painter.dart';
+import 'styles/pulsing_center_painter.dart';
 import 'styles/radial_painter.dart';
+import 'styles/spectrum_rings_painter.dart';
 import 'styles/wave_painter.dart';
+import 'styles/energy_wave_painter.dart';
 import 'visualizer_config.dart';
 import 'visualizer_data.dart';
 import 'visualizer_style.dart';
 import 'visualizer_theme.dart';
 
-/// Creates the painter matching [style]. This is the only place that maps a
-/// style to its renderer.
 VisualizerPainter createPainter(
   VisualizerStyle style,
   VisualizerData data,
@@ -34,11 +41,18 @@ VisualizerPainter createPainter(
     VisualizerStyle.fluid => FluidPainter(data, config, theme),
     VisualizerStyle.particles => ParticlesPainter(data, config, theme),
     VisualizerStyle.geometry => GeometricPainter(data, config, theme),
+    VisualizerStyle.neonBars => NeonBarsPainter(data, config, theme),
+    VisualizerStyle.bassCircle => BassCirclePainter(data, config, theme),
+    VisualizerStyle.frequencyRings => FrequencyRingsPainter(data, config, theme),
+    VisualizerStyle.energyWave => EnergyWavePainter(data, config, theme),
+    VisualizerStyle.particleExplosion => ParticleExplosionPainter(data, config, theme),
+    VisualizerStyle.pulsingCenter => PulsingCenterPainter(data, config, theme),
+    VisualizerStyle.spectrumRings => SpectrumRingsPainter(data, config, theme),
+    VisualizerStyle.fluidBass => FluidBassPainter(data, config, theme),
+    VisualizerStyle.circularWave => CircularWavePainter(data, config, theme),
   };
 }
 
-/// Renders the active visualizer, driving data updates from a [Ticker] so the
-/// visuals advance at the display's refresh rate (60/90/120 Hz).
 class VisualizerView extends StatefulWidget {
   const VisualizerView({
     super.key,
@@ -53,9 +67,6 @@ class VisualizerView extends StatefulWidget {
   final VisualizerConfig config;
   final VisualizerThemeData theme;
   final VisualizerStyle style;
-
-  /// Called on every display frame; the controller should push the latest
-  /// interpolated analysis frame into [data].
   final VoidCallback onTick;
 
   @override
@@ -69,9 +80,7 @@ class _VisualizerViewState extends State<VisualizerView>
   @override
   void initState() {
     super.initState();
-    _ticker = createTicker((_) {
-      widget.onTick();
-    })..start();
+    _ticker = createTicker((_) => widget.onTick())..start();
   }
 
   @override
@@ -87,12 +96,15 @@ class _VisualizerViewState extends State<VisualizerView>
         animation: widget.data,
         builder: (context, _) {
           return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 450),
+            duration: const Duration(milliseconds: 500),
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
             transitionBuilder: (child, animation) => FadeTransition(
               opacity: animation,
-              child: ScaleTransition(scale: Tween(begin: 1.04, end: 1.0).animate(animation), child: child),
+              child: ScaleTransition(
+                scale: Tween(begin: 1.06, end: 1.0).animate(animation),
+                child: child,
+              ),
             ),
             child: CustomPaint(
               key: ValueKey(widget.style),

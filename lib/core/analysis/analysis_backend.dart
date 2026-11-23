@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ffmpeg_kit_flutter_new_audio/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_audio/return_code.dart';
@@ -15,14 +16,12 @@ class AnalysisException implements Exception {
   String toString() => 'AnalysisException: $message';
 }
 
-/// Decodes an audio file to mono 22050 Hz PCM with FFmpeg, then runs the
-/// pure-Dart [SpectrumAnalyzer] in a background isolate.
 class AnalysisBackend {
   static const int _decodeSampleRate = SpectrumAnalyzer.sampleRate;
 
   Future<AnalysisResult> analyze(String filePath) async {
     final tempDir = await getTemporaryDirectory();
-    final rawPath = p.join(tempDir.path, 'avl_${DateTime.now().microsecondsSinceEpoch}.raw');
+    final rawPath = p.join(tempDir.path, 'avl_v2_${DateTime.now().microsecondsSinceEpoch}.raw');
 
     try {
       final session = await FFmpegKit.execute(
@@ -42,15 +41,13 @@ class AnalysisBackend {
       }
       return await compute(_analyzeBytes, bytes);
     } finally {
-      // Best-effort cleanup of the temp PCM file.
       try {
         final f = File(rawPath);
         if (f.existsSync()) f.deleteSync();
-      } catch (_) {/* ignore */}
+      } catch (_) {}
     }
   }
 
-  /// Runs in a separate isolate; must be a top-level or static function.
   static AnalysisResult _analyzeBytes(Uint8List bytes) {
     final data = ByteData.sublistView(bytes);
     final sampleCount = bytes.length ~/ 2;

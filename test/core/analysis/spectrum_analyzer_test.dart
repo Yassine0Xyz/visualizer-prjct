@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:audio_visualizer_lab/core/analysis/audio_frame.dart';
-import 'package:audio_visualizer_lab/core/analysis/spectrum_analyzer.dart';
+import 'package:audio_visualizer_lab_v2/core/analysis/audio_frame.dart';
+import 'package:audio_visualizer_lab_v2/core/analysis/spectrum_analyzer.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

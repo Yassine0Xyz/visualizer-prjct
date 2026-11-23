@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import '../../visualizers/visualizer_view.dart';
 import '../player_controller.dart';
 
-/// Immersive fullscreen visualizer. Tap toggles a minimal control overlay.
 class FullscreenVisualizerScreen extends StatefulWidget {
   const FullscreenVisualizerScreen({super.key, required this.controller});
 
@@ -49,7 +47,7 @@ class _FullscreenVisualizerScreenState extends State<FullscreenVisualizerScreen>
             ),
             AnimatedOpacity(
               opacity: _overlayVisible ? 1 : 0,
-              duration: const Duration(milliseconds: 250),
+              duration: const Duration(milliseconds: 300),
               child: IgnorePointer(
                 ignoring: !_overlayVisible,
                 child: Container(
@@ -57,10 +55,10 @@ class _FullscreenVisualizerScreenState extends State<FullscreenVisualizerScreen>
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.center,
-                      colors: [Colors.black.withValues(alpha: 0.6), Colors.transparent],
+                      colors: [Colors.black.withValues(alpha: 0.7), Colors.transparent],
                     ),
                   ),
-                  padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
+                  padding: const EdgeInsets.fromLTRB(16, 52, 16, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -78,7 +76,7 @@ class _FullscreenVisualizerScreenState extends State<FullscreenVisualizerScreen>
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -88,12 +86,11 @@ class _FullscreenVisualizerScreenState extends State<FullscreenVisualizerScreen>
                             builder: (context, snapshot) {
                               final playing = snapshot.data ?? false;
                               return IconButton(
-                                iconSize: 30,
+                                iconSize: 32,
                                 icon: Icon(playing
                                     ? Icons.pause_circle_outline_rounded
                                     : Icons.play_circle_outline_rounded),
-                                onPressed:
-                                    playing ? controller.pause : controller.play,
+                                onPressed: playing ? controller.pause : controller.play,
                               );
                             },
                           ),
@@ -104,7 +101,7 @@ class _FullscreenVisualizerScreenState extends State<FullscreenVisualizerScreen>
                         child: Text(
                           'Double-tap screen or tap ✕ to exit fullscreen',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.35),
+                            color: Colors.white.withValues(alpha: 0.30),
                             fontSize: 12,
                           ),
                         ),

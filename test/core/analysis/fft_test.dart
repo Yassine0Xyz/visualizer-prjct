@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:audio_visualizer_lab/core/analysis/fft.dart';
+import 'package:audio_visualizer_lab_v2/core/analysis/fft.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

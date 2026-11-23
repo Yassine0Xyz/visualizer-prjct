@@ -1,14 +1,7 @@
 import 'package:just_audio/just_audio.dart';
 
-/// Thin, replaceable wrapper around the concrete player plugin.
-///
-/// Visualizers never see this class; they only consume [AudioFrame] data via
-/// the controller. To port the lab to another player later, re-implement this
-/// single class.
 class AudioEngine {
   final AudioPlayer _player = AudioPlayer(
-    // Offload scheduling can starve position updates on some devices when
-    // combined with per-frame polling; keep it simple and reliable.
     androidAudioOffloadPreferences: const AndroidAudioOffloadPreferences(
       audioOffloadMode: AndroidAudioOffloadMode.disabled,
     ),
@@ -27,6 +20,5 @@ class AudioEngine {
   Future<void> pause() => _player.pause();
   Future<void> stop() => _player.stop();
   Future<void> seek(Duration position) => _player.seek(position);
-
   Future<void> dispose() => _player.dispose();
 }

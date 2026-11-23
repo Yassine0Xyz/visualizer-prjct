@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Premium dark theme shared by the whole lab.
 abstract final class AppTheme {
   static const seed = Color(0xFF7C4DFF);
 
@@ -12,7 +11,7 @@ abstract final class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: const Color(0xFF07070D),
+      scaffoldBackgroundColor: const Color(0xFF050508),
       splashFactory: InkSparkle.splashFactory,
       sliderTheme: const SliderThemeData(
         trackHeight: 3,
@@ -26,11 +25,17 @@ abstract final class AppTheme {
   }
 }
 
-/// Small helper: glassmorphic container decoration.
 BoxDecoration glassDecoration({double radius = 24, Color? tint}) {
   return BoxDecoration(
     borderRadius: BorderRadius.circular(radius),
-    color: (tint ?? Colors.white).withValues(alpha: 0.06),
-    border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
+    color: (tint ?? Colors.white).withValues(alpha: 0.04),
+    border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.2),
+        blurRadius: 20,
+        offset: const Offset(0, 8),
+      ),
+    ],
   );
 }

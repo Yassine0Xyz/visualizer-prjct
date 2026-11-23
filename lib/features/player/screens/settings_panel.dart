@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
-
 import '../../visualizers/visualizer_theme.dart';
 import '../player_controller.dart';
 
-/// Bottom-sheet settings panel for visualizer customization.
-Future<void> showSettingsSheet(
-  BuildContext context,
-  PlayerController controller,
-) {
+Future<void> showSettingsSheet(BuildContext context, PlayerController controller) {
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFF101018),
+    backgroundColor: const Color(0xFF0C0C18),
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
     ),
     builder: (context) => _SettingsSheet(controller: controller),
   );
@@ -32,7 +27,7 @@ class _SettingsSheet extends StatelessWidget {
         left: 24,
         right: 24,
         top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 28,
       ),
       child: AnimatedBuilder(
         animation: Listenable.merge([controller, config]),
@@ -47,22 +42,21 @@ class _SettingsSheet extends StatelessWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white24,
+                      color: Colors.white20,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                const Text('Visualizer Settings',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 20),
-                const Text('Visualizer settings',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 16),
 
                 _SliderRow(
                   label: 'Sensitivity',
                   value: config.sensitivity,
                   min: 0.2,
-                  max: 3.0,
+                  max: 4.0,
                   onChanged: (v) => config.sensitivity = v,
                 ),
                 _SliderRow(
@@ -76,32 +70,53 @@ class _SettingsSheet extends StatelessWidget {
                   label: 'Intensity',
                   value: config.intensity,
                   min: 0.3,
-                  max: 2.0,
+                  max: 2.5,
                   onChanged: (v) => config.intensity = v,
                 ),
+                _SliderRow(
+                  label: 'Bass Boost',
+                  value: config.bassBoost,
+                  min: 0.5,
+                  max: 3.0,
+                  onChanged: (v) => config.bassBoost = v,
+                ),
+
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Glow effect',
-                      style: TextStyle(fontSize: 14)),
+                  title: const Text('Glow Effect', style: TextStyle(fontSize: 14)),
                   value: config.glow,
                   onChanged: (v) => config.glow = v,
                 ),
                 if (config.glow)
                   _SliderRow(
-                    label: 'Glow radius',
+                    label: 'Glow Radius',
                     value: config.glowRadius,
                     min: 0,
-                    max: 24,
+                    max: 32,
                     onChanged: (v) => config.glowRadius = v,
                   ),
 
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Particles', style: TextStyle(fontSize: 14)),
+                  value: config.particles,
+                  onChanged: (v) => config.particles = v,
+                ),
+
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Mirror Mode', style: TextStyle(fontSize: 14)),
+                  value: config.mirror,
+                  onChanged: (v) => config.mirror = v,
+                ),
+
+                const SizedBox(height: 16),
+                const Text('Color Theme',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 12),
-                const Text('Color theme',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: 10,
+                  runSpacing: 10,
                   children: [
                     for (final t in VisualizerThemeData.presets)
                       ChoiceChip(
@@ -112,7 +127,7 @@ class _SettingsSheet extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
               ],
             ),
           );
@@ -142,8 +157,8 @@ class _SliderRow extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 92,
-          child: Text(label, style: const TextStyle(fontSize: 13)),
+          width: 100,
+          child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
         ),
         Expanded(
           child: Slider(

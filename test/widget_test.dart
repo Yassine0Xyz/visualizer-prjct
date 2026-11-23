@@ -1,4 +1,4 @@
-import 'package:audio_visualizer_lab/core/theme/app_theme.dart';
+import 'package:audio_visualizer_lab_v2/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

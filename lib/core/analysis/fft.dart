@@ -1,13 +1,9 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-/// Iterative radix-2 FFT in pure Dart.
-///
-/// Operates in-place on pre-allocated [Float64List] buffers so the analyzer
-/// never allocates inside its per-window loop. The trigonometric table is
-/// precomputed once per instance.
+/// Radix-2 FFT optimized for audio analysis
 class Fft {
-  Fft(this.size) : assert(size >= 2 && (size & (size - 1)) == 0, 'FFT size must be a power of two') {
+  Fft(this.size) : assert(size >= 2 && (size & (size - 1)) == 0) {
     _levels = _log2(size);
     final half = size >> 1;
     _cosTable = Float64List(half);
@@ -25,10 +21,7 @@ class Fft {
 
   static int _log2(int n) {
     var r = 0;
-    while (n > 1) {
-      n >>= 1;
-      r++;
-    }
+    while (n > 1) { n >>= 1; r++; }
     return r;
   }
 
@@ -41,24 +34,16 @@ class Fft {
     return y;
   }
 
-  /// In-place complex FFT. [re] and [im] must have exactly [size] elements.
   void transform(Float64List re, Float64List im) {
     final n = size;
-
-    // Bit-reversal permutation.
     for (var i = 0; i < n; i++) {
       final j = _reverseBits(i, _levels);
       if (j > i) {
-        var t = re[i];
-        re[i] = re[j];
-        re[j] = t;
-        t = im[i];
-        im[i] = im[j];
-        im[j] = t;
+        var t = re[i]; re[i] = re[j]; re[j] = t;
+        t = im[i]; im[i] = im[j]; im[j] = t;
       }
     }
 
-    // Cooley-Tukey butterflies.
     for (var len = 2; len <= n; len <<= 1) {
       final half = len >> 1;
       final step = n ~/ len;
@@ -80,7 +65,6 @@ class Fft {
   }
 }
 
-/// Cached Hann window of the given size.
 Float64List hannWindow(int size) {
   final w = Float64List(size);
   for (var i = 0; i < size; i++) {

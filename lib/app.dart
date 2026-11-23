@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'core/theme/app_theme.dart';
 import 'features/player/player_controller.dart';
 import 'features/player/screens/home_screen.dart';
@@ -23,7 +22,7 @@ class _VisualizerLabAppState extends State<VisualizerLabApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Visualizer Lab',
+      title: 'Visualizer Lab V2',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       home: HomeScreen(controller: controller),

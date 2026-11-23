@@ -17,7 +17,7 @@ class BarsPainter extends VisualizerPainter {
 
     for (var i = 0; i < n; i++) {
       final v = data.values[i];
-      final h = (v * maxH * config.intensity).clamp(2.0, maxH);
+      final h = (v * maxH * config.intensity).clamp(2.0, maxH).toDouble();
       final x = i * slot + (slot - barWidth) / 2;
       final color = colorAt(i / (n - 1));
 
