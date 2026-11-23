@@ -50,8 +50,8 @@ class VisualizerData extends ChangeNotifier {
     double smoothness,
     Float32List? waveLeft,
     Float32List? waveRight,
-    double duelLeftTarget = 0,
-    double duelRightTarget = 0,
+    double duelLeftTarget,
+    double duelRightTarget,
   ) {
     previousValues.setAll(0, values);
     if (waveLeft != null && waveRight != null) {
