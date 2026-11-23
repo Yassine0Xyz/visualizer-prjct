@@ -11,7 +11,7 @@ class FluidBassPainter extends VisualizerPainter {
 
     final center = size.center(Offset.zero);
     final minDim = math.min(size.width, size.height);
-    final bass = data.bass * config.bassBoost;
+    final bass = (data.bass * config.bassBoost).clamp(0.0, 1.0).toDouble();
     final energy = data.energy;
 
     // Liquid blobs responding to bass
@@ -19,7 +19,7 @@ class FluidBassPainter extends VisualizerPainter {
     for (var blob = 0; blob < blobCount; blob++) {
       final t = blob / (blobCount - 1);
       final baseRadius = minDim * (0.08 + t * 0.18);
-      final blobBass = bass * (0.7 + t * 0.3);
+      final blobBass = (bass * (0.7 + t * 0.3)).clamp(0.0, 1.0).toDouble();
 
       final points = <Offset>[];
       final segments = 20 + blob * 4;

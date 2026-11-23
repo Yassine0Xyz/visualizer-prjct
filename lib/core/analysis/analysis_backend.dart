@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'spectrum_analyzer.dart';
+import 'audio_frame.dart';
 
 class AnalysisException implements Exception {
   AnalysisException(this.message);
@@ -25,7 +26,7 @@ class AnalysisBackend {
     try {
       final session = await FFmpegKit.execute(
         '-y -hide_banner -loglevel error '
-        '-i "$filePath" -vn -ac 1 -ar $_decodeSampleRate -f s16le "$rawPath"',
+        '-i "$filePath" -vn -ac 2 -ar $_decodeSampleRate -f s16le "$rawPath"',
       );
       final returnCode = await session.getReturnCode();
       if (!ReturnCode.isSuccess(returnCode)) {
@@ -35,7 +36,7 @@ class AnalysisBackend {
       }
 
       final bytes = await File(rawPath).readAsBytes();
-      if (bytes.length < 2) {
+      if (bytes.length < 4) {
         throw AnalysisException('Decoded audio is empty');
       }
       return await compute(_analyzeBytes, bytes);
@@ -49,11 +50,35 @@ class AnalysisBackend {
 
   static AnalysisResult _analyzeBytes(Uint8List bytes) {
     final data = ByteData.sublistView(bytes);
-    final sampleCount = bytes.length ~/ 2;
-    final pcm = Float32List(sampleCount);
+    final sampleCount = bytes.length ~/ 4;
+    final left = Float32List(sampleCount);
+    final right = Float32List(sampleCount);
+    final mono = Float32List(sampleCount);
     for (var i = 0; i < sampleCount; i++) {
-      pcm[i] = data.getInt16(i * 2, Endian.little) / 32768.0;
+      left[i] = data.getInt16(i * 4, Endian.little) / 32768.0;
+      right[i] = data.getInt16(i * 4 + 2, Endian.little) / 32768.0;
+      mono[i] = (left[i] + right[i]) * 0.5;
     }
-    return SpectrumAnalyzer.analyzePcm(pcm);
+    final result = SpectrumAnalyzer.analyzePcm(mono);
+    const waveformCount = 64;
+    final frames = <AudioFrame>[];
+    for (var frameIndex = 0; frameIndex < result.frames.length; frameIndex++) {
+      final frame = result.frames[frameIndex];
+      final start = frameIndex * SpectrumAnalyzer.hopSize;
+      final waveL = Float32List(waveformCount);
+      final waveR = Float32List(waveformCount);
+      for (var sample = 0; sample < waveformCount; sample++) {
+        final source = start + sample * SpectrumAnalyzer.fftSize ~/ waveformCount;
+        waveL[sample] = left[source];
+        waveR[sample] = right[source];
+      }
+      frames.add(AudioFrame(
+        timeMs: frame.timeMs, bands: frame.bands, bass: frame.bass, mid: frame.mid,
+        high: frame.high, energy: frame.energy, bassEnergy: frame.bassEnergy,
+        midEnergy: frame.midEnergy, highEnergy: frame.highEnergy,
+        waveformLeft: waveL, waveformRight: waveR,
+      ));
+    }
+    return AnalysisResult(frames: frames, sampleRate: result.sampleRate, duration: result.duration);
   }
 }

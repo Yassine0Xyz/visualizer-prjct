@@ -12,8 +12,8 @@ class BarsPainter extends VisualizerPainter {
 
     final n = data.values.length;
     final slot = size.width / n;
-    final barWidth = slot * 0.62;
-    final maxH = size.height * 0.72;
+    final barWidth = slot * 0.48;
+    final maxH = size.height * 0.62;
 
     for (var i = 0; i < n; i++) {
       final v = data.values[i];
@@ -23,7 +23,7 @@ class BarsPainter extends VisualizerPainter {
 
       final rect = RRect.fromRectAndRadius(
         Rect.fromLTWH(x, size.height - h, barWidth, h),
-        Radius.circular(barWidth / 2),
+        Radius.circular(3),
       );
       if (config.glow) {
         canvas.drawRRect(

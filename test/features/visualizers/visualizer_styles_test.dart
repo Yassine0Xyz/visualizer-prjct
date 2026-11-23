@@ -9,8 +9,8 @@ import 'package:audio_visualizer_lab_v2/features/visualizers/visualizer_view.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('all 18 visualizer styles create and paint without throwing', () {
-    expect(VisualizerStyle.values, hasLength(18));
+  test('all 20 visualizer styles create and paint without throwing', () {
+    expect(VisualizerStyle.values, hasLength(20));
     final data = VisualizerData();
     final config = VisualizerConfig();
     final theme = VisualizerThemeData.presets.first;

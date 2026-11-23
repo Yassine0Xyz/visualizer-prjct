@@ -19,6 +19,8 @@ import 'styles/pulsing_center_painter.dart';
 import 'styles/radial_painter.dart';
 import 'styles/spectrum_rings_painter.dart';
 import 'styles/wave_painter.dart';
+import 'styles/waterfall_painter.dart';
+import 'styles/oscilloscope_painter.dart';
 import 'styles/energy_wave_painter.dart';
 import 'visualizer_config.dart';
 import 'visualizer_data.dart';
@@ -50,6 +52,8 @@ VisualizerPainter createPainter(
     VisualizerStyle.spectrumRings => SpectrumRingsPainter(data, config, theme),
     VisualizerStyle.fluidBass => FluidBassPainter(data, config, theme),
     VisualizerStyle.circularWave => CircularWavePainter(data, config, theme),
+    VisualizerStyle.waterfall => WaterfallPainter(data, config, theme),
+    VisualizerStyle.oscilloscope => OscilloscopePainter(data, config, theme),
   };
 }
 

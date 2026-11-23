@@ -103,7 +103,15 @@ class SpectrumAnalyzer {
           .clamp(0.0, 1.0)
           .toDouble();
 
+      const waveformCount = 64;
+      final waveform = Float32List(waveformCount);
+      for (var sample = 0; sample < waveformCount; sample++) {
+        final source = start + (sample * fftSize ~/ waveformCount);
+        waveform[sample] = pcm[source];
+      }
       frames.add(AudioFrame(
+        waveformLeft: waveform,
+        waveformRight: waveform,
         timeMs: start * 1000.0 / sampleRate,
         bands: bands,
         bass: bass,

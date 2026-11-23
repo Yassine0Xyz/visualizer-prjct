@@ -53,6 +53,7 @@ class PlayerController extends ChangeNotifier {
 
   Future<void> loadTrack(String path, {String? title}) async {
     isLoading = true;
+    data.clearHistory();
     analysisFailed = false;
     statusMessage = 'Decoding & analyzing audio...';
     notifyListeners();
@@ -145,9 +146,17 @@ class PlayerController extends ChangeNotifier {
       _softClip(_lerp(f0.midEnergy, f1.midEnergy, frac) * gain),
       _softClip(_lerp(f0.highEnergy, f1.highEnergy, frac) * gain),
       config.smoothness,
+      _interpolateWave(f0.waveformLeft, f1.waveformLeft, frac),
+      _interpolateWave(f0.waveformRight, f1.waveformRight, frac),
     );
   }
 
+  static Float32List? _interpolateWave(Float32List? a, Float32List? b, double t) {
+    if (a == null || b == null || a.length != b.length) return null;
+    final out = Float32List(a.length);
+    for (var i = 0; i < out.length; i++) out[i] = a[i] + (b[i] - a[i]) * t;
+    return out;
+  }
   static double _lerp(double a, double b, double t) => a + (b - a) * t;
 
   static double _softClip(double x) {

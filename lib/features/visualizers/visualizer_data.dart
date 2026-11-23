@@ -10,6 +10,9 @@ class VisualizerData extends ChangeNotifier {
   }
 
   static const int bandCount = AudioFrame.bandCount;
+  static const int historyCapacity = 120;
+  final List<Float32List> _history = <Float32List>[];
+  List<Float32List> get history => List<Float32List>.unmodifiable(_history);
 
   late final Float32List values;
   late final Float32List targets;
@@ -25,10 +28,13 @@ class VisualizerData extends ChangeNotifier {
 
   double phase = 0;
   double beatPhase = 0;
+  Float32List waveformLeft = Float32List(64);
+  Float32List waveformRight = Float32List(64);
 
   bool _stopped = true;
 
   void setStopped(bool stopped) => _stopped = stopped;
+  void clearHistory() => _history.clear();
 
   void update(
     Float32List newTargets,
@@ -40,8 +46,14 @@ class VisualizerData extends ChangeNotifier {
     double midEnergyT,
     double highEnergyT,
     double smoothness,
+    Float32List? waveLeft,
+    Float32List? waveRight,
   ) {
     previousValues.setAll(0, values);
+    if (waveLeft != null && waveRight != null) {
+      waveformLeft = Float32List.fromList(waveLeft);
+      waveformRight = Float32List.fromList(waveRight);
+    }
     targets.setAll(0, newTargets);
 
     if (!_stopped) {
@@ -62,6 +74,10 @@ class VisualizerData extends ChangeNotifier {
       final v = _filter(values[i], targets[i], smoothness);
       if ((v - values[i]).abs() > 0.0003) dirty = true;
       values[i] = v;
+    }
+    if (!_stopped && (_history.isEmpty || _history.last.asMap().entries.any((e) => (e.value - values[e.key]).abs() > 0.025))) {
+      _history.add(Float32List.fromList(values));
+      if (_history.length > historyCapacity) _history.removeAt(0);
     }
     if (dirty || !_stopped) notifyListeners();
   }

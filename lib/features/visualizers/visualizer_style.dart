@@ -18,7 +18,9 @@ enum VisualizerStyle {
   pulsingCenter,
   spectrumRings,
   fluidBass,
-  circularWave;
+  circularWave,
+  waterfall,
+  oscilloscope;
 
   String get label => switch (this) {
     VisualizerStyle.bars => 'Bars',
@@ -39,6 +41,8 @@ enum VisualizerStyle {
     VisualizerStyle.spectrumRings => 'Spectrum Rings',
     VisualizerStyle.fluidBass => 'Fluid Bass',
     VisualizerStyle.circularWave => 'Circular Wave',
+    VisualizerStyle.waterfall => 'Waterfall',
+    VisualizerStyle.oscilloscope => 'Oscilloscope',
   };
 
   String get description => switch (this) {
@@ -60,6 +64,8 @@ enum VisualizerStyle {
     VisualizerStyle.spectrumRings => 'Rotating spectrum rings.',
     VisualizerStyle.fluidBass => 'Liquid bass visualization.',
     VisualizerStyle.circularWave => 'Circular wave spectrum.',
+    VisualizerStyle.waterfall => 'Scrolling frequency heatmap over time.',
+    VisualizerStyle.oscilloscope => 'Stereo waveform scope with a centered trace.',
   };
 
   IconData get icon => switch (this) {
@@ -81,5 +87,7 @@ enum VisualizerStyle {
     VisualizerStyle.spectrumRings => Icons.all_inclusive,
     VisualizerStyle.fluidBass => Icons.water_drop,
     VisualizerStyle.circularWave => Icons.donut_large,
+    VisualizerStyle.waterfall => Icons.grid_view_rounded,
+    VisualizerStyle.oscilloscope => Icons.multiline_chart_rounded,
   };
 }

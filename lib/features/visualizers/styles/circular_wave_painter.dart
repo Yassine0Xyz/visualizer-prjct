@@ -14,10 +14,10 @@ class CircularWavePainter extends VisualizerPainter {
     final n = data.values.length;
 
     // Circular wave spectrum
-    final ringCount = 4;
+    final ringCount = 2;
     for (var ring = 0; ring < ringCount; ring++) {
       final t = ring / (ringCount - 1);
-      final baseRadius = minDim * (0.12 + t * 0.18);
+      final baseRadius = minDim * (0.16 + t * 0.13);
 
       final points = <Offset>[];
       final segments = n;
@@ -63,12 +63,12 @@ class CircularWavePainter extends VisualizerPainter {
     }
 
     // Spokes
-    final spokeCount = 16;
+    final spokeCount = 8;
     for (var i = 0; i < spokeCount; i++) {
       final angle = 2 * math.pi * i / spokeCount + data.phase * 0.2;
       final bandIdx = (i / spokeCount * n).round();
       final v = data.values[bandIdx.clamp(0, n - 1).toInt()];
-      final innerR = minDim * 0.08;
+      final innerR = minDim * 0.10;
       final outerR = minDim * (0.12 + v * 0.20);
 
       final inner = center + Offset(math.cos(angle), math.sin(angle)) * innerR;

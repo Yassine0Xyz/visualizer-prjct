@@ -1,12 +1,12 @@
 # Audio Visualizer Lab V2
 
 A standalone Flutter application for researching and comparing
-high-quality, audio-reactive visualizers. Version 2 includes 18 implemented
+high-quality, audio-reactive visualizers. Version 2 includes 20 implemented
 visualizer styles and an updated analysis pipeline.
 
 ## Features V2
 
-- 18 unique visualizer styles (9 original + 9 new premium styles)
+- 20 unique visualizer styles, including a time-history Waterfall and an Oscilloscope
 - Real FFT analysis pipeline with 64 frequency bands
 - Enhanced audio reactivity: bass, mid, high, energy, and raw energy values
 - Premium dark UI with glassmorphism design
@@ -15,7 +15,7 @@ visualizer styles and an updated analysis pipeline.
 - Fullscreen immersive mode
 - Animated rendering with interpolated spectrum updates
 
-## 18 Visualizer Styles
+## 20 Visualizer Styles
 
 ### Original 9:
 1. **Bars** - Classic spectrum bars
@@ -28,7 +28,7 @@ visualizer styles and an updated analysis pipeline.
 8. **Particles** - Orbiting particle field
 9. **Geometry** - Rotating low-poly rings
 
-### New Premium 9:
+### New and Updated Styles:
 10. **Neon Bars** - Neon light bars with trails and tips
 11. **Bass Circle** - Pulsing circles with bass spikes
 12. **Frequency Rings** - Concentric rings with arc segments
@@ -38,6 +38,8 @@ visualizer styles and an updated analysis pipeline.
 16. **Spectrum Rings** - Rotating spectrum as rings
 17. **Fluid Bass** - Liquid blobs responding to bass
 18. **Circular Wave** - Circular wave with spokes
+19. **Waterfall** - Scrolling spectrogram heatmap over time
+20. **Oscilloscope** - Separate left/right time-domain waveforms
 
 ## Architecture
 
@@ -45,10 +47,10 @@ visualizer styles and an updated analysis pipeline.
 audio file
    │  ffmpeg_kit_flutter_new_audio
    ▼
-mono PCM → isolate → FFT (2048, radix-2) → 64 log-spaced bands
+dual-channel PCM → isolate → FFT (2048, radix-2) → 64 log-spaced bands
    │
    ▼
-AudioFrame { bands[64], bass, mid, high, energy, bassEnergy, midEnergy, highEnergy }
+AudioFrame { bands[64], stereo waveform samples, bass, mid, high, energy, bassEnergy, midEnergy, highEnergy }
    │
    ▼
 PlayerController → interpolation → VisualizerData → CustomPainter @ 60fps+

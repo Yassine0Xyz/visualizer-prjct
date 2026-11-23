@@ -11,6 +11,8 @@ class AudioFrame {
     required this.bassEnergy,
     required this.midEnergy,
     required this.highEnergy,
+    this.waveformLeft,
+    this.waveformRight,
   });
 
   final double timeMs;
@@ -22,6 +24,9 @@ class AudioFrame {
   final double bassEnergy;
   final double midEnergy;
   final double highEnergy;
+  /// Downsampled waveform snapshots retained for time-domain visualizers.
+  final Float32List? waveformLeft;
+  final Float32List? waveformRight;
 
   static const int bandCount = 64;
 }
