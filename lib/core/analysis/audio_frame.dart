@@ -13,6 +13,8 @@ class AudioFrame {
     required this.highEnergy,
     this.waveformLeft,
     this.waveformRight,
+    this.duelLeftEnergy = 0,
+    this.duelRightEnergy = 0,
   });
 
   final double timeMs;
@@ -27,6 +29,9 @@ class AudioFrame {
   /// Downsampled waveform snapshots retained for time-domain visualizers.
   final Float32List? waveformLeft;
   final Float32List? waveformRight;
+  /// Shared-normalized RMS for each stereo channel, used by Duel.
+  final double duelLeftEnergy;
+  final double duelRightEnergy;
 
   static const int bandCount = 64;
 }

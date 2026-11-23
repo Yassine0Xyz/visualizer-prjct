@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:audio_visualizer_lab_v2/features/visualizers/base/visualizer_painter.dart';
@@ -9,8 +10,19 @@ import 'package:audio_visualizer_lab_v2/features/visualizers/visualizer_view.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('all 20 visualizer styles create and paint without throwing', () {
-    expect(VisualizerStyle.values, hasLength(20));
+  test('Duel applies the same response to equal stereo channel energies', () {
+    final data = VisualizerData()..setStopped(false);
+    data.update(
+      Float32List(VisualizerData.bandCount),
+      0, 0, 0, 0, 0, 0, 0, 0.5,
+      null, null, 0.8, 0.8,
+    );
+    expect(data.duelLeftEnergy, data.duelRightEnergy);
+    data.dispose();
+  });
+
+  test('all 21 visualizer styles create and paint without throwing', () {
+    expect(VisualizerStyle.values, hasLength(21));
     final data = VisualizerData();
     final config = VisualizerConfig();
     final theme = VisualizerThemeData.presets.first;

@@ -28,6 +28,8 @@ class VisualizerData extends ChangeNotifier {
 
   double phase = 0;
   double beatPhase = 0;
+  double duelLeftEnergy = 0;
+  double duelRightEnergy = 0;
   Float32List waveformLeft = Float32List(64);
   Float32List waveformRight = Float32List(64);
 
@@ -48,6 +50,8 @@ class VisualizerData extends ChangeNotifier {
     double smoothness,
     Float32List? waveLeft,
     Float32List? waveRight,
+    double duelLeftTarget = 0,
+    double duelRightTarget = 0,
   ) {
     previousValues.setAll(0, values);
     if (waveLeft != null && waveRight != null) {
@@ -68,6 +72,8 @@ class VisualizerData extends ChangeNotifier {
     bassEnergy = _filter(bassEnergy, bassEnergyT, smoothness);
     midEnergy = _filter(midEnergy, midEnergyT, smoothness);
     highEnergy = _filter(highEnergy, highEnergyT, smoothness);
+    duelLeftEnergy = _filter(duelLeftEnergy, duelLeftTarget, smoothness);
+    duelRightEnergy = _filter(duelRightEnergy, duelRightTarget, smoothness);
 
     var dirty = false;
     for (var i = 0; i < values.length; i++) {

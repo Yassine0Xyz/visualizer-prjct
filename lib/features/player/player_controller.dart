@@ -148,6 +148,8 @@ class PlayerController extends ChangeNotifier {
       config.smoothness,
       _interpolateWave(f0.waveformLeft, f1.waveformLeft, frac),
       _interpolateWave(f0.waveformRight, f1.waveformRight, frac),
+      _softClip(_lerp(f0.duelLeftEnergy, f1.duelLeftEnergy, frac) * gain),
+      _softClip(_lerp(f0.duelRightEnergy, f1.duelRightEnergy, frac) * gain),
     );
   }
 

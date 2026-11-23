@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:ffmpeg_kit_flutter_new_audio/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_audio/return_code.dart';
@@ -62,6 +63,21 @@ class AnalysisBackend {
     final result = SpectrumAnalyzer.analyzePcm(mono);
     const waveformCount = 64;
     final frames = <AudioFrame>[];
+    final leftRms = Float64List(result.frames.length);
+    final rightRms = Float64List(result.frames.length);
+    var commonPeakRms = 0.0;
+    for (var frameIndex = 0; frameIndex < result.frames.length; frameIndex++) {
+      final start = frameIndex * SpectrumAnalyzer.hopSize;
+      var leftPower = 0.0;
+      var rightPower = 0.0;
+      for (var sample = 0; sample < SpectrumAnalyzer.fftSize; sample++) {
+        leftPower += left[start + sample] * left[start + sample];
+        rightPower += right[start + sample] * right[start + sample];
+      }
+      leftRms[frameIndex] = math.sqrt(leftPower / SpectrumAnalyzer.fftSize);
+      rightRms[frameIndex] = math.sqrt(rightPower / SpectrumAnalyzer.fftSize);
+      commonPeakRms = math.max(commonPeakRms, math.max(leftRms[frameIndex], rightRms[frameIndex])).toDouble();
+    }
     for (var frameIndex = 0; frameIndex < result.frames.length; frameIndex++) {
       final frame = result.frames[frameIndex];
       final start = frameIndex * SpectrumAnalyzer.hopSize;
@@ -76,7 +92,14 @@ class AnalysisBackend {
         timeMs: frame.timeMs, bands: frame.bands, bass: frame.bass, mid: frame.mid,
         high: frame.high, energy: frame.energy, bassEnergy: frame.bassEnergy,
         midEnergy: frame.midEnergy, highEnergy: frame.highEnergy,
-        waveformLeft: waveL, waveformRight: waveR,
+        waveformLeft: waveL,
+        waveformRight: waveR,
+        duelLeftEnergy: commonPeakRms == 0
+            ? 0
+            : math.sqrt(leftRms[frameIndex] / commonPeakRms),
+        duelRightEnergy: commonPeakRms == 0
+            ? 0
+            : math.sqrt(rightRms[frameIndex] / commonPeakRms),
       ));
     }
     return AnalysisResult(frames: frames, sampleRate: result.sampleRate, duration: result.duration);

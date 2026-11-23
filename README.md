@@ -1,12 +1,12 @@
 # Audio Visualizer Lab V2
 
 A standalone Flutter application for researching and comparing
-high-quality, audio-reactive visualizers. Version 2 includes 20 implemented
+high-quality, audio-reactive visualizers. Version 2 includes 21 implemented
 visualizer styles and an updated analysis pipeline.
 
 ## Features V2
 
-- 20 unique visualizer styles, including a time-history Waterfall and an Oscilloscope
+- 21 unique visualizer styles, including Waterfall, a stereo Oscilloscope, and the balanced Duel arena
 - Real FFT analysis pipeline with 64 frequency bands
 - Enhanced audio reactivity: bass, mid, high, energy, and raw energy values
 - Premium dark UI with glassmorphism design
@@ -15,7 +15,7 @@ visualizer styles and an updated analysis pipeline.
 - Fullscreen immersive mode
 - Animated rendering with interpolated spectrum updates
 
-## 20 Visualizer Styles
+## 21 Visualizer Styles
 
 ### Original 9:
 1. **Bars** - Classic spectrum bars
@@ -40,6 +40,7 @@ visualizer styles and an updated analysis pipeline.
 18. **Circular Wave** - Circular wave with spokes
 19. **Waterfall** - Scrolling spectrogram heatmap over time
 20. **Oscilloscope** - Separate left/right time-domain waveforms
+21. **Duel** - Fair, shared-scale head-to-head stereo energy cores
 
 ## Architecture
 
@@ -50,7 +51,7 @@ audio file
 dual-channel PCM → isolate → FFT (2048, radix-2) → 64 log-spaced bands
    │
    ▼
-AudioFrame { bands[64], stereo waveform samples, bass, mid, high, energy, bassEnergy, midEnergy, highEnergy }
+AudioFrame { bands[64], stereo waveform samples plus shared-normalized L/R energy, bass, mid, high, energy, bassEnergy, midEnergy, highEnergy }
    │
    ▼
 PlayerController → interpolation → VisualizerData → CustomPainter @ 60fps+
