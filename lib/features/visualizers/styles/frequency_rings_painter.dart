@@ -24,12 +24,14 @@ class FrequencyRingsPainter extends VisualizerPainter {
       for (var segment = 0; segment < segmentCount; segment++) {
         final rangeStart = ring < 3 ? 0 : (ring < 6 ? count ~/ 3 : (count * 2) ~/ 3);
         final rangeEnd = ring < 3 ? count ~/ 3 : (ring < 6 ? (count * 2) ~/ 3 : count);
-        final bandIndex = (rangeStart + (segment * 2 + ring) % math.max(1, rangeEnd - rangeStart)) % count;
-        final value = data.values[bandIndex].clamp(0.0, 1.0).toDouble();
+        final bandIndex =
+            (rangeStart + (segment * 2 + ring) % math.max(1, rangeEnd - rangeStart)) % count;
+        final safeBandIndex = bandIndex.toInt();
+        final value = data.values[safeBandIndex].clamp(0.0, 1.0).toDouble();
         final sweep = segmentLength * (0.30 + value * 0.62);
         final rotation = data.phase * (ring.isEven ? 0.35 : -0.28);
         final startAngle = segment * segmentLength + rotation;
-        final color = colorAt(bandIndex / count, energy: data.energy, bass: data.bass);
+        final color = colorAt(safeBandIndex / count, energy: data.energy, bass: data.bass);
         final paint = Paint()
           ..color = color.withValues(alpha: 0.38 + value * 0.58)
           ..style = PaintingStyle.stroke

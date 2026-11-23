@@ -154,7 +154,9 @@ class PlayerController extends ChangeNotifier {
   static Float32List? _interpolateWave(Float32List? a, Float32List? b, double t) {
     if (a == null || b == null || a.length != b.length) return null;
     final out = Float32List(a.length);
-    for (var i = 0; i < out.length; i++) out[i] = a[i] + (b[i] - a[i]) * t;
+    for (var i = 0; i < out.length; i++) {
+      out[i] = a[i] + (b[i] - a[i]) * t;
+    }
     return out;
   }
   static double _lerp(double a, double b, double t) => a + (b - a) * t;
