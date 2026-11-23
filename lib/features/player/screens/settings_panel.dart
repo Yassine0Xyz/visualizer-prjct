@@ -42,7 +42,7 @@ class _SettingsSheet extends StatelessWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white20,
+                      color: const Color.fromRGBO(255, 255, 255, 0.20),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),

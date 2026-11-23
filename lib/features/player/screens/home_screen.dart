@@ -72,7 +72,7 @@ class HomeScreen extends StatelessWidget {
                                     Text(
                                       'V2 · Premium Audio Reactive Visualizers',
                                       style: TextStyle(
-                                        color: Colors.white45,
+                                        color: const Color.fromRGBO(255, 255, 255, 0.45),
                                         fontSize: 13,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -123,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                                             ? controller.statusMessage
                                             : 'Pick a local track to start experimenting',
                                         style: const TextStyle(
-                                          color: Colors.white45,
+                                          color: Color.fromRGBO(255, 255, 255, 0.45),
                                           fontSize: 12.5,
                                         ),
                                       ),
@@ -140,7 +140,7 @@ class HomeScreen extends StatelessWidget {
                           if (controller.hasTrack)
                             _GlassCard(
                               onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute(
+                                MaterialPageRoute<void>(
                                   builder: (_) => VisualizerScreen(controller: controller),
                                 ),
                               ),
@@ -189,7 +189,7 @@ class HomeScreen extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             'Each style has a unique identity — all driven by real FFT analysis.',
-                            style: TextStyle(color: Colors.white35, fontSize: 12.5),
+                            style: TextStyle(color: const Color.fromRGBO(255, 255, 255, 0.35), fontSize: 12.5),
                           ),
                           const SizedBox(height: 18),
                         ],
@@ -216,7 +216,7 @@ class HomeScreen extends StatelessWidget {
                               controller.selectStyle(s);
                               if (controller.hasTrack) {
                                 Navigator.of(context).push(
-                                  MaterialPageRoute(
+                                  MaterialPageRoute<void>(
                                     builder: (_) => VisualizerScreen(controller: controller),
                                   ),
                                 );
@@ -237,7 +237,7 @@ class HomeScreen extends StatelessWidget {
                       child: Center(
                         child: Text(
                           'Standalone experiment · no connection to any other project',
-                          style: TextStyle(color: Colors.white18, fontSize: 11),
+                          style: TextStyle(color: const Color.fromRGBO(255, 255, 255, 0.18), fontSize: 11),
                         ),
                       ),
                     ),

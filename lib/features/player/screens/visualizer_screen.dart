@@ -3,6 +3,7 @@ import '../../visualizers/visualizer_style.dart';
 import '../../visualizers/visualizer_view.dart';
 import '../player_controller.dart';
 import 'fullscreen_visualizer_screen.dart';
+import 'settings_panel.dart';
 
 class VisualizerScreen extends StatelessWidget {
   const VisualizerScreen({super.key, required this.controller});
@@ -52,7 +53,7 @@ class VisualizerScreen extends StatelessWidget {
                       Row(
                         children: [
                           const Icon(Icons.music_note_rounded,
-                              size: 20, color: Colors.white45),
+                              size: 20, color: Color.fromRGBO(255, 255, 255, 0.45)),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -114,9 +115,9 @@ class VisualizerScreen extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(_fmt(pos),
-                                        style: const TextStyle(color: Colors.white35, fontSize: 11)),
+                                        style: const TextStyle(color: Color.fromRGBO(255, 255, 255, 0.35), fontSize: 11)),
                                     Text(_fmt(dur),
-                                        style: const TextStyle(color: Colors.white35, fontSize: 11)),
+                                        style: const TextStyle(color: Color.fromRGBO(255, 255, 255, 0.35), fontSize: 11)),
                                   ],
                                 ),
                               ),
@@ -226,7 +227,7 @@ class VisualizerScreen extends StatelessWidget {
 
   void _openFullscreen(BuildContext context) {
     Navigator.of(context).push(
-      PageRouteBuilder(
+      PageRouteBuilder<void>(
         opaque: true,
         transitionDuration: const Duration(milliseconds: 500),
         pageBuilder: (_, animation, __) => FadeTransition(
@@ -260,7 +261,7 @@ class _RoundButton extends StatelessWidget {
           border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         ),
         child: Icon(icon, size: small ? 20 : 24,
-            color: onPressed == null ? Colors.white20 : Colors.white70),
+            color: onPressed == null ? const Color.fromRGBO(255, 255, 255, 0.20) : Colors.white70),
       ),
     );
   }

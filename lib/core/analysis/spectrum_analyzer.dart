@@ -43,7 +43,9 @@ class SpectrumAnalyzer {
     });
 
     final peaks = Float64List(bandCount);
-    for (var i = 0; i < bandCount; i++) peaks[i] = _peakFloor;
+    for (var i = 0; i < bandCount; i++) {
+      peaks[i] = _peakFloor;
+    }
 
     final frames = <AudioFrame>[];
     final mags = Float64List(bandCount);
