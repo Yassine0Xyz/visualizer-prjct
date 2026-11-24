@@ -2,7 +2,8 @@
 
 A standalone Flutter application for researching and comparing
 high-quality, audio-reactive visualizers. Version 2 includes 21 implemented
-visualizer styles and an updated analysis pipeline.
+visualizer styles and an updated analysis pipeline. Duel supports both Stereo L/R
+and Bass vs Treble matchups.
 
 ## Features V2
 
@@ -40,7 +41,7 @@ visualizer styles and an updated analysis pipeline.
 18. **Circular Wave** - Circular wave with spokes
 19. **Waterfall** - Scrolling spectrogram heatmap over time
 20. **Oscilloscope** - Separate left/right time-domain waveforms
-21. **Duel** - Fair, shared-scale head-to-head stereo energy cores
+21. **Duel** - Fair, shared-scale head-to-head energy cores; choose Stereo L/R or Bass vs Treble in settings
 
 ## Architecture
 

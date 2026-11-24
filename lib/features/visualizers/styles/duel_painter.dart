@@ -3,9 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../base/visualizer_painter.dart';
+import '../visualizer_config.dart';
 
-/// Head-to-head energy arena: stereo channels use the same scale, smoothing,
-/// radius mapping, and motion budget for a fair visual contest.
+/// Head-to-head energy arena with stereo-channel and bass-versus-treble modes.
 class DuelPainter extends VisualizerPainter {
   DuelPainter(super.data, super.config, super.theme);
 
@@ -16,8 +16,15 @@ class DuelPainter extends VisualizerPainter {
 
     final minSide = math.min(size.width, size.height);
     final center = Offset(size.width * 0.5, size.height * 0.51);
-    final leftEnergy = data.duelLeftEnergy.clamp(0.0, 1.0).toDouble();
-    final rightEnergy = data.duelRightEnergy.clamp(0.0, 1.0).toDouble();
+    final frequencyMode = config.duelMode == DuelMode.bassVsTreble;
+    final leftEnergy = (frequencyMode ? data.bass : data.duelLeftEnergy)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    final rightEnergy = (frequencyMode ? data.high : data.duelRightEnergy)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    final leftLabel = frequencyMode ? 'BASS' : 'LEFT CHANNEL';
+    final rightLabel = frequencyMode ? 'TREBLE' : 'RIGHT CHANNEL';
     final balance = (leftEnergy - rightEnergy).clamp(-1.0, 1.0).toDouble();
     final leftColor = colorAt(0.12, energy: leftEnergy, bass: data.bass);
     final rightColor = colorAt(0.84, energy: rightEnergy, bass: data.bass);
@@ -43,7 +50,7 @@ class DuelPainter extends VisualizerPainter {
     );
 
     // The winning side advances while its opponent is pushed back by the same
-    // amount. Equal channel strength always yields a perfectly mirrored arena.
+    // amount. Equal source strength always yields a perfectly mirrored arena.
     final advance = balance * minSide * 0.075;
     final baseOffset = math.min(minSide * 0.245, size.width * 0.255);
     final leftCenter = Offset(center.dx - baseOffset + advance, center.dy);
@@ -87,7 +94,7 @@ class DuelPainter extends VisualizerPainter {
     _drawCaption(
       canvas,
       Offset(arenaRect.left + minSide * 0.08, arenaRect.top + minSide * 0.07),
-      'LEFT CHANNEL',
+      leftLabel,
       leftColor,
       leftEnergy,
       true,
@@ -95,12 +102,19 @@ class DuelPainter extends VisualizerPainter {
     _drawCaption(
       canvas,
       Offset(arenaRect.right - minSide * 0.08, arenaRect.top + minSide * 0.07),
-      'RIGHT CHANNEL',
+      rightLabel,
       rightColor,
       rightEnergy,
       false,
     );
-    _drawFairnessNote(canvas, Offset(center.dx, arenaRect.bottom - minSide * 0.055), size.width);
+    _drawFairnessNote(
+      canvas,
+      Offset(center.dx, arenaRect.bottom - minSide * 0.055),
+      size.width,
+      frequencyMode
+          ? 'BASS VS TREBLE  ·  SHARED SCALE'
+          : 'STEREO ENERGY  ·  SHARED SCALE',
+    );
   }
 
   void _drawEnergyTrail(
@@ -289,10 +303,15 @@ class DuelPainter extends VisualizerPainter {
     );
   }
 
-  void _drawFairnessNote(Canvas canvas, Offset center, double width) {
+  void _drawFairnessNote(
+    Canvas canvas,
+    Offset center,
+    double width,
+    String label,
+  ) {
     final note = TextPainter(
       text: TextSpan(
-        text: 'STEREO ENERGY  ·  SHARED SCALE',
+        text: label,
         style: TextStyle(
           color: Colors.white.withValues(alpha: 0.28),
           fontSize: 8,

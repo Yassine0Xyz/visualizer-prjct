@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../visualizers/visualizer_config.dart';
+import '../../visualizers/visualizer_style.dart';
 import '../../visualizers/visualizer_theme.dart';
 import '../player_controller.dart';
 
@@ -51,6 +53,31 @@ class _SettingsSheet extends StatelessWidget {
                 const Text('Visualizer Settings',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 20),
+
+                if (controller.style == VisualizerStyle.duel) ...[
+                  const Text('Duel Matchup',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 4),
+                  const Text('Choose which signals compete.',
+                      style: TextStyle(fontSize: 12, color: Colors.white60)),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Stereo L/R'),
+                        selected: config.duelMode == DuelMode.stereo,
+                        onSelected: (_) => config.duelMode = DuelMode.stereo,
+                      ),
+                      ChoiceChip(
+                        label: const Text('Bass vs Treble'),
+                        selected: config.duelMode == DuelMode.bassVsTreble,
+                        onSelected: (_) => config.duelMode = DuelMode.bassVsTreble,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
 
                 _SliderRow(
                   label: 'Sensitivity',

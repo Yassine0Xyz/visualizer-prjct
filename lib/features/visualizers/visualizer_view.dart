@@ -99,7 +99,7 @@ class _VisualizerViewState extends State<VisualizerView>
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: AnimatedBuilder(
-        animation: widget.data,
+        animation: Listenable.merge([widget.data, widget.config]),
         builder: (context, _) {
           return AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),

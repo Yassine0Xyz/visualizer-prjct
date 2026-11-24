@@ -21,6 +21,26 @@ void main() {
     data.dispose();
   });
 
+  test('Duel supports a Bass versus Treble matchup', () {
+    final data = VisualizerData();
+    final config = VisualizerConfig()..duelMode = DuelMode.bassVsTreble;
+    final theme = VisualizerThemeData.presets.first;
+    data.bass = 0.75;
+    data.high = 0.35;
+
+    expect(config.duelMode, DuelMode.bassVsTreble);
+    final painter = createPainter(VisualizerStyle.duel, data, config, theme);
+    final recorder = ui.PictureRecorder();
+    expect(
+      () => painter.paint(ui.Canvas(recorder), const ui.Size(400, 800)),
+      returnsNormally,
+    );
+
+    recorder.endRecording().dispose();
+    data.dispose();
+    config.dispose();
+  });
+
   test('all 21 visualizer styles create and paint without throwing', () {
     expect(VisualizerStyle.values, hasLength(21));
     final data = VisualizerData();

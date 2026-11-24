@@ -1,6 +1,19 @@
 import 'package:flutter/foundation.dart';
 
+enum DuelMode {
+  stereo,
+  bassVsTreble,
+}
+
 class VisualizerConfig extends ChangeNotifier {
+  DuelMode get duelMode => _duelMode;
+  DuelMode _duelMode = DuelMode.stereo;
+  set duelMode(DuelMode value) {
+    if (_duelMode == value) return;
+    _duelMode = value;
+    notifyListeners();
+  }
+
   double get sensitivity => _sensitivity;
   double _sensitivity = 1.4;
   set sensitivity(double v) {
