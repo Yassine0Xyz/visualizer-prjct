@@ -58,19 +58,33 @@ class DuelPainter extends VisualizerPainter {
     final beatPulse = math.sin(data.beatPhase).abs();
     final leftRadius = minSide * (0.073 + leftEnergy * 0.070 + beatPulse * leftEnergy * 0.012);
     final rightRadius = minSide * (0.073 + rightEnergy * 0.070 + beatPulse * rightEnergy * 0.012);
+    final leadStrength = ((balance.abs() - 0.035) / 0.38)
+        .clamp(0.0, 1.0)
+        .toDouble();
 
     _drawEnergyTrail(canvas, center, leftCenter, leftRadius, leftColor, leftEnergy, true, minSide);
     _drawEnergyTrail(canvas, center, rightCenter, rightRadius, rightColor, rightEnergy, false, minSide);
+    if (balance > 0.035) {
+      _drawVictoryAura(
+        canvas,
+        leftCenter,
+        leftRadius,
+        leftColor,
+        leftEnergy,
+        leadStrength,
+      );
+    } else if (balance < -0.035) {
+      _drawVictoryAura(
+        canvas,
+        rightCenter,
+        rightRadius,
+        rightColor,
+        rightEnergy,
+        leadStrength,
+      );
+    }
     _drawCore(canvas, leftCenter, leftRadius, leftEnergy, leftColor, data.phase, true);
     _drawCore(canvas, rightCenter, rightRadius, rightEnergy, rightColor, -data.phase * 0.91, false);
-
-    final clash = ((leftEnergy + rightEnergy) * 0.5).clamp(0.0, 1.0).toDouble();
-    final clashPoint = Offset(center.dx + balance * minSide * 0.035, center.dy);
-    if (clash > 0.015) {
-      final blendColor = Color.lerp(leftColor, rightColor, 0.5)!;
-      _drawImpactVfx(canvas, clashPoint, minSide, clash, beatPulse, blendColor);
-      _drawSparks(canvas, clashPoint, minSide, clash, balance, leftColor, rightColor);
-    }
 
     _drawCaption(
       canvas,
@@ -216,138 +230,89 @@ class DuelPainter extends VisualizerPainter {
     );
   }
 
-  void _drawSparks(
+  void _drawVictoryAura(
     Canvas canvas,
     Offset center,
-    double minSide,
-    double clash,
-    double balance,
-    Color leftColor,
-    Color rightColor,
+    double radius,
+    Color color,
+    double energy,
+    double strength,
   ) {
-    // Deterministic, phase-driven sparks keep the effect lively without
-    // allocating particle state or letting either fighter gain an advantage.
-    final count = 18 + (clash * 18).round();
-    for (var i = 0; i < count; i++) {
-      final seed = i * 2.399963229728653 +
-          data.phase * (i.isEven ? 1.0 : -0.82) +
-          balance * 0.5;
-      final direction = Offset(math.cos(seed), math.sin(seed) * 0.78);
-      final travel = minSide * (0.040 + ((i * 37) % 11) / 160 + clash * 0.045);
-      final flicker = 0.72 + 0.28 * math.sin(data.phase * 3.2 + i * 1.7).abs();
-      final point = Offset(
-        center.dx + direction.dx * travel,
-        center.dy + direction.dy * travel,
-      );
-      final color = i.isEven ? leftColor : rightColor;
-      final tail = Offset(
-        point.dx - direction.dx * travel * (0.12 + clash * 0.10),
-        point.dy - direction.dy * travel * (0.12 + clash * 0.10),
-      );
-      final sparkPaint = Paint()
-        ..color = Color.lerp(color, Colors.white, 0.38)!
-            .withValues(alpha: (0.48 + clash * 0.48) * flicker)
-        ..strokeWidth = minSide * (0.0022 + clash * 0.0018)
-        ..strokeCap = StrokeCap.round;
-      canvas.drawLine(tail, point, sparkPaint);
-      canvas.drawCircle(
-        point,
-        minSide * (0.0022 + clash * 0.0022) * flicker,
-        Paint()
-          ..color = Colors.white.withValues(alpha: (0.55 + clash * 0.4) * flicker)
-          ..maskFilter = config.glow
-              ? MaskFilter.blur(BlurStyle.normal, minSide * 0.004)
-              : null,
-      );
-    }
-  }
-
-  void _drawImpactVfx(
-    Canvas canvas,
-    Offset center,
-    double minSide,
-    double clash,
-    double beatPulse,
-    Color blendColor,
-  ) {
-    final pulse = (math.sin(data.phase * 2.4).abs() * 0.35 + beatPulse * 0.65);
-    final flashRadius = minSide * (0.013 + clash * 0.025) * (0.88 + pulse * 0.35);
+    if (strength <= 0.01) return;
+    final pulse = 0.76 + 0.24 * math.sin(data.phase * 2.0).abs();
     canvas.drawCircle(
       center,
-      flashRadius * (2.5 + pulse * 0.8),
+      radius * (1.42 + strength * 0.12),
       Paint()
-        ..color = blendColor.withValues(alpha: 0.16 + clash * 0.20 + pulse * 0.08)
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, minSide * 0.038),
-    );
-    canvas.drawCircle(
-      center,
-      flashRadius,
-      Paint()
-        ..shader = RadialGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.98),
-            Color.lerp(blendColor, Colors.white, 0.38)!
-                .withValues(alpha: 0.94),
-            blendColor.withValues(alpha: 0.72),
-            Colors.transparent,
-          ],
-          stops: const [0.0, 0.18, 0.52, 1.0],
-        ).createShader(Rect.fromCircle(center: center, radius: flashRadius)),
+        ..color = color.withValues(alpha: 0.085 * strength * pulse)
+        ..maskFilter = config.glow
+            ? MaskFilter.blur(BlurStyle.normal, radius * 0.44)
+            : null,
     );
 
-    // Paired elliptical shockwaves expand and fade from each impact.
-    for (var ring = 0; ring < 2; ring++) {
-      final ringPhase = (data.phase * 0.72 + ring * 0.5) % 1.0;
-      final ringRect = Rect.fromCenter(
-        center: center,
-        width: minSide * (0.055 + ringPhase * 0.20),
-        height: minSide * (0.030 + ringPhase * 0.105),
-      );
-      final alpha = (1.0 - ringPhase) * (0.30 + clash * 0.48);
-      canvas.drawOval(
-        ringRect,
-        Paint()
-          ..color = Color.lerp(blendColor, Colors.white, 0.32)!
-              .withValues(alpha: alpha)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = minSide * (0.002 + clash * 0.002)
-          ..maskFilter = config.glow
-              ? MaskFilter.blur(BlurStyle.normal, minSide * 0.006)
-              : null,
-      );
+    const tongues = 12;
+    final maxLength = radius * (0.34 + energy * 0.24) * (0.70 + strength * 0.30);
+    final maxHalfWidth = radius * (0.12 + energy * 0.035);
+    final flamePaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: [
+          color.withValues(alpha: 0.015 * strength),
+          color.withValues(alpha: 0.20 * strength),
+          color.withValues(alpha: 0.35 * strength * pulse),
+          color.withValues(alpha: 0.025 * strength),
+        ],
+        stops: const [0.0, 0.36, 0.70, 1.0],
+      ).createShader(
+        Rect.fromLTRB(
+          -maxHalfWidth * 1.3,
+          radius * 0.66,
+          maxHalfWidth * 1.3,
+          radius + maxLength,
+        ),
+      )
+      ..blendMode = BlendMode.plus;
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    for (var i = 0; i < tongues; i++) {
+      final flutter = 0.68 + 0.32 * math.sin(data.phase * 2.8 + i * 1.73).abs();
+      final length = radius * (0.34 + energy * 0.24) * flutter * (0.70 + strength * 0.30);
+      final halfWidth = radius * (0.12 + energy * 0.035) * flutter;
+      final angle = (math.pi * 2 * i / tongues) + data.phase * 0.045;
+      final path = Path()
+        ..moveTo(-halfWidth * 0.46, radius * 0.68)
+        ..cubicTo(
+          -halfWidth * 1.20,
+          radius * 0.92,
+          -halfWidth * 0.32,
+          radius + length * 0.46,
+          0,
+          radius + length,
+        )
+        ..cubicTo(
+          halfWidth * 0.30,
+          radius + length * 0.48,
+          halfWidth * 1.16,
+          radius * 0.90,
+          halfWidth * 0.46,
+          radius * 0.68,
+        )
+        ..cubicTo(
+          halfWidth * 0.18,
+          radius * 0.79,
+          -halfWidth * 0.20,
+          radius * 0.79,
+          -halfWidth * 0.46,
+          radius * 0.68,
+        )
+        ..close();
+      canvas.save();
+      canvas.rotate(angle);
+      canvas.drawPath(path, flamePaint);
+      canvas.restore();
     }
-
-    // Short jagged energy arcs connect the two approaching cores at impact.
-    for (var arc = 0; arc < 4; arc++) {
-      final angle = arc * math.pi / 2 + data.phase * (arc.isEven ? 0.7 : -0.55);
-      final length = minSide * (0.045 + clash * 0.045);
-      final dx = math.cos(angle);
-      final dy = math.sin(angle) * 0.72;
-      final path = Path()..moveTo(center.dx, center.dy);
-      for (var segment = 1; segment <= 4; segment++) {
-        final t = segment / 4;
-        final jitter = segment == 4
-            ? 0.0
-            : math.sin(data.phase * 4 + arc * 2.1 + segment * 2.7) * length * 0.18;
-        path.lineTo(
-          center.dx + dx * length * t - dy * jitter,
-          center.dy + dy * length * t + dx * jitter,
-        );
-      }
-      final arcColor = arc.isEven ? Colors.white : blendColor;
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = arcColor.withValues(alpha: 0.45 + clash * 0.45)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = minSide * (0.0018 + clash * 0.0015)
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round
-          ..maskFilter = config.glow
-              ? MaskFilter.blur(BlurStyle.normal, minSide * 0.004)
-              : null,
-      );
-    }
+    canvas.restore();
   }
 
   void _drawCaption(

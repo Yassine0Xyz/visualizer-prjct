@@ -41,6 +41,36 @@ void main() {
     config.dispose();
   });
 
+  test('Duel victory aura follows the leading source in both modes', () {
+    final data = VisualizerData();
+    final config = VisualizerConfig();
+    final theme = VisualizerThemeData.presets.first;
+    data.duelLeftEnergy = 0.92;
+    data.duelRightEnergy = 0.14;
+
+    var recorder = ui.PictureRecorder();
+    var painter = createPainter(VisualizerStyle.duel, data, config, theme);
+    expect(
+      () => painter.paint(ui.Canvas(recorder), const ui.Size(400, 800)),
+      returnsNormally,
+    );
+    recorder.endRecording().dispose();
+
+    config.duelMode = DuelMode.bassVsTreble;
+    data.bass = 0.12;
+    data.high = 0.94;
+    recorder = ui.PictureRecorder();
+    painter = createPainter(VisualizerStyle.duel, data, config, theme);
+    expect(
+      () => painter.paint(ui.Canvas(recorder), const ui.Size(400, 800)),
+      returnsNormally,
+    );
+    recorder.endRecording().dispose();
+
+    data.dispose();
+    config.dispose();
+  });
+
   test('all 21 visualizer styles create and paint without throwing', () {
     expect(VisualizerStyle.values, hasLength(21));
     final data = VisualizerData();
