@@ -25,6 +25,10 @@ class AnimeFightersPainter extends VisualizerPainter {
     final bassPeak = _unit(data.bassEnergy);
     final treblePeak = _unit(data.highEnergy);
     final clash = _unit(data.fighterClash);
+    final clashProgress = _unit(data.fighterClashProgress);
+    final strike = (1 - (clashProgress - 0.41).abs() / 0.18)
+        .clamp(0.0, 1.0)
+        .toDouble();
     final fighterScale = minSide * 0.335;
     final groundY = h * 0.70;
     final center = Offset(w * 0.5, groundY);
@@ -55,6 +59,7 @@ class AnimeFightersPainter extends VisualizerPainter {
       bassPeak,
       phase,
       clash,
+      strike,
       mirrored: false,
       refined: false,
     );
@@ -68,12 +73,22 @@ class AnimeFightersPainter extends VisualizerPainter {
       treblePeak,
       -phase * 0.83,
       clash,
+      strike,
       mirrored: true,
       refined: true,
     );
 
     _drawParticles(canvas, size, minSide, phase, bass, treble, clash);
-    if (clash > 0.015) _drawClash(canvas, Offset(w * 0.5, groundY - fighterScale * 0.67), minSide, clash, phase);
+    if (clash > 0.015) {
+      _drawClash(
+        canvas,
+        Offset(w * 0.5, groundY - fighterScale * 0.55),
+        minSide,
+        clash,
+        clashProgress,
+        phase,
+      );
+    }
     _drawLabels(canvas, size, minSide, bass, treble, clash);
   }
 
@@ -206,11 +221,16 @@ class AnimeFightersPainter extends VisualizerPainter {
     double peak,
     double phase,
     double clash, {
+    required double strike,
     required bool mirrored,
     required bool refined,
   }) {
-    final lean = (refined ? 0.012 : -0.018) + math.sin(phase * (refined ? 1.4 : 1.1)) * 0.014;
-    final crouch = (refined ? energy * 0.018 : energy * 0.030) + peak * 0.010;
+    final lean = (refined ? 0.012 : -0.018) +
+        math.sin(phase * (refined ? 1.4 : 1.1)) * 0.014 +
+        strike * 0.075;
+    final crouch = (refined ? energy * 0.018 : energy * 0.030) +
+        peak * 0.010 -
+        strike * 0.016;
     final outlineAlpha = 0.39 + energy * 0.26 + peak * 0.16;
     final glow = config.glow
         ? (config.glowRadius * 0.23 / scale).clamp(0.006, 0.032).toDouble()
@@ -237,9 +257,9 @@ class AnimeFightersPainter extends VisualizerPainter {
     final rearLeg = Path()
       ..moveTo(-0.055, -0.37)
       ..lineTo(-0.145, -0.30)
-      ..lineTo(-0.19, -0.105)
-      ..lineTo(-0.235, -0.018)
-      ..lineTo(-0.14, 0)
+      ..lineTo(-0.19 + strike * 0.025, -0.105)
+      ..lineTo(-0.235 + strike * 0.035, -0.018)
+      ..lineTo(-0.14 + strike * 0.035, 0)
       ..lineTo(-0.055, -0.10)
       ..lineTo(0.03, -0.29)
       ..close();
@@ -248,9 +268,9 @@ class AnimeFightersPainter extends VisualizerPainter {
     final frontLeg = Path()
       ..moveTo(0.025, -0.39)
       ..lineTo(0.12, -0.32)
-      ..lineTo(0.17, -0.13)
-      ..lineTo(0.245, -0.025)
-      ..lineTo(0.16, 0.002)
+      ..lineTo(0.17 + strike * 0.04, -0.13)
+      ..lineTo(0.245 + strike * 0.075, -0.025)
+      ..lineTo(0.16 + strike * 0.065, 0.002)
       ..lineTo(0.04, -0.10)
       ..lineTo(-0.045, -0.27)
       ..close();
@@ -358,25 +378,57 @@ class AnimeFightersPainter extends VisualizerPainter {
     canvas.drawPath(inlay, detailPaint);
     canvas.drawLine(Offset(-0.09, -0.29), Offset(-0.145, -0.19), detailPaint);
 
-    _drawSword(canvas, energyColor, energy, peak, phase, clash, refined, scale);
+    _drawSword(canvas, energyColor, energy, peak, phase, clash, strike, refined, scale);
     canvas.restore();
   }
 
   void _drawSword(Canvas canvas, Color color, double energy, double peak,
-      double phase, double clash, bool refined, double scale) {
-    final hilt = Offset(0.205, -0.478);
-    final baseTip = Offset(refined ? 0.585 : 0.61, refined ? -0.91 : -0.865);
-    final sweep = math.sin(phase * (refined ? 2.1 : 1.55) + 0.5) * (refined ? 0.018 : 0.012);
-    final tip = Offset(baseTip.dx + sweep + clash * 0.065, baseTip.dy - clash * 0.035);
-    final edge = Offset(tip.dx - 0.074, tip.dy + 0.024);
+      double phase, double clash, double strike, bool refined, double scale) {
+    final hilt = Offset(0.205 + strike * 0.025, -0.478 - strike * 0.016);
+    final length = refined ? 0.39 : 0.40;
+    final idleAngle = refined ? -0.83 : -0.77;
+    final swing = math.sin(phase * (refined ? 2.1 : 1.55) + 0.5) * 0.035;
+    final bladeAngle = idleAngle + strike * 0.64 + swing;
+    final direction = Offset(math.cos(bladeAngle), math.sin(bladeAngle));
+    final normal = Offset(-direction.dy, direction.dx);
+    final tip = hilt + direction * (length + clash * 0.035);
+    final root = hilt + direction * 0.018;
     final guard = Offset(hilt.dx + 0.026, hilt.dy - 0.026);
     final pulse = (0.44 + energy * 0.22 + peak * 0.30 + clash * 0.22).clamp(0.0, 1.0).toDouble();
     final blade = Path()
-      ..moveTo(hilt.dx + 0.012, hilt.dy - 0.022)
-      ..lineTo(tip.dx, tip.dy)
-      ..lineTo(edge.dx, edge.dy)
-      ..lineTo(hilt.dx - 0.012, hilt.dy + 0.014)
+      ..moveTo(root.dx + normal.dx * 0.014, root.dy + normal.dy * 0.014)
+      ..lineTo(tip.dx + normal.dx * 0.009, tip.dy + normal.dy * 0.009)
+      ..lineTo(tip.dx - normal.dx * 0.009, tip.dy - normal.dy * 0.009)
+      ..lineTo(root.dx - normal.dx * 0.014, root.dy - normal.dy * 0.014)
       ..close();
+
+    if (strike > 0.025) {
+      final oldAngle = bladeAngle - (refined ? 0.50 : 0.58) * strike;
+      final oldTip = hilt + Offset(math.cos(oldAngle), math.sin(oldAngle)) * length;
+      final trail = Path()
+        ..moveTo(oldTip.dx, oldTip.dy)
+        ..quadraticBezierTo(
+          hilt.dx + direction.dx * length * 0.72,
+          hilt.dy + direction.dy * length * 0.72 - strike * 0.045,
+          tip.dx,
+          tip.dy,
+        );
+      canvas.drawPath(
+        trail,
+        Paint()
+          ..color = color.withValues(alpha: strike * (0.24 + energy * 0.16))
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.010 + strike * 0.012
+          ..strokeCap = StrokeCap.round
+          ..maskFilter = config.glow
+              ? MaskFilter.blur(
+                  BlurStyle.normal,
+                  (config.glowRadius * 0.11 / scale).clamp(0.005, 0.016).toDouble(),
+                )
+              : null
+          ..blendMode = BlendMode.screen,
+      );
+    }
     canvas.drawPath(
       blade,
       Paint()
@@ -478,40 +530,80 @@ class AnimeFightersPainter extends VisualizerPainter {
     }
   }
 
-  void _drawClash(Canvas canvas, Offset point, double unit, double amount, double phase) {
-    final pulse = amount * (0.84 + 0.16 * math.sin(phase * 2.8).abs());
-    final radius = unit * (0.045 + (1 - amount) * 0.29);
-    final flashRect = Rect.fromCircle(center: point, radius: unit * 0.12);
+  void _drawClash(
+    Canvas canvas,
+    Offset point,
+    double unit,
+    double amount,
+    double progress,
+    double phase,
+  ) {
+    final hit = (1 - (progress - 0.41).abs() / 0.18).clamp(0.0, 1.0).toDouble();
+    final pulse = amount * (0.82 + 0.18 * math.sin(phase * 2.8).abs());
+    final radius = unit * (0.035 + progress * 0.18);
+    final flashRect = Rect.fromCircle(center: point, radius: unit * (0.12 + hit * 0.06));
     canvas.drawCircle(
       point,
-      unit * (0.11 + amount * 0.08),
+      unit * (0.06 + hit * 0.14),
       Paint()
         ..shader = RadialGradient(colors: [
-          Colors.white.withValues(alpha: 0.60 * pulse),
-          Color.lerp(_blue, _purple, 0.5)!.withValues(alpha: 0.25 * pulse),
+          Colors.white.withValues(alpha: 0.72 * hit),
+          Color.lerp(_blue, _purple, 0.5)!.withValues(alpha: 0.34 * pulse),
           Colors.transparent,
-        ], stops: const [0, 0.22, 1]).createShader(flashRect.inflate(unit * amount)),
+        ], stops: const [0, 0.22, 1]).createShader(flashRect.inflate(unit * hit)),
     );
     final ringPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.36 * pulse)
+      ..color = Colors.white.withValues(alpha: 0.42 * pulse)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0 + amount * 2.0;
+      ..strokeWidth = 1.0 + hit * 2.4;
     canvas.drawCircle(point, radius, ringPaint);
     canvas.drawCircle(point, radius * 0.74,
       Paint()..color = _blue.withValues(alpha: 0.32 * pulse)..style = PaintingStyle.stroke..strokeWidth = 1.3);
     canvas.drawCircle(point, radius * 1.16,
       Paint()..color = _purple.withValues(alpha: 0.30 * pulse)..style = PaintingStyle.stroke..strokeWidth = 1.1);
 
-    // Four short slashing rays imply crossed blades; the one-shot envelope fades them out.
-    for (var i = 0; i < 4; i++) {
-      final angle = math.pi * 0.25 + i * math.pi * 0.5 + phase * 0.13;
+    // A tight white impact star sits at the exact crossing point.
+    for (var i = 0; i < 8; i++) {
+      final angle = math.pi * i / 8 + phase * 0.08;
       final direction = Offset(math.cos(angle), math.sin(angle));
-      final start = point + direction * unit * 0.045;
-      final end = point + direction * unit * (0.15 + amount * 0.10);
+      final start = point + direction * unit * 0.012;
+      final end = point + direction * unit * (0.025 + hit * 0.085);
       canvas.drawLine(start, end, Paint()
-        ..color = (i.isEven ? _blue : _purple).withValues(alpha: 0.52 * pulse)
-        ..strokeWidth = 1.0 + amount * 1.8
+        ..color = (i.isEven ? Colors.white : _blue).withValues(alpha: 0.62 * pulse)
+        ..strokeWidth = 0.8 + hit * 1.8
         ..strokeCap = StrokeCap.round);
+    }
+
+    // Sparks are seeded by index and phase (no randomness or per-frame objects
+    // retained), arc away with short tails, then shrink and extinguish.
+    final scatter = ((progress - 0.39) / 0.61).clamp(0.0, 1.0).toDouble();
+    final fade = ((1.0 - progress) / 0.61).clamp(0.0, 1.0).toDouble();
+    for (var i = 0; i < 18; i++) {
+      final seed = i * 2.399963 + phase * 0.07;
+      final angle = seed + math.sin(seed * 1.7) * 0.13;
+      final direction = Offset(math.cos(angle), math.sin(angle));
+      final radiusNow = unit * (0.018 + scatter * (0.055 + (i % 4) * 0.018));
+      final trailLength = unit * (0.018 + scatter * (0.032 + (i % 3) * 0.012));
+      final start = point + direction * radiusNow;
+      final end = start + direction * trailLength;
+      final color = i % 3 == 0 ? Colors.white : (i.isEven ? _blue : _purple);
+      final alpha = (0.72 * pulse * fade * (0.62 + (i % 5) * 0.075)).clamp(0.0, 0.92).toDouble();
+      final tail = start - direction * trailLength * 0.56 +
+          Offset(-direction.dy, direction.dx) * math.sin(seed * 2.0) * unit * 0.012;
+      final sparkPath = Path()
+        ..moveTo(tail.dx, tail.dy)
+        ..quadraticBezierTo(start.dx, start.dy, end.dx, end.dy);
+      canvas.drawPath(
+        sparkPath,
+        Paint()
+          ..color = color.withValues(alpha: alpha)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = i % 3 == 0 ? 1.55 : 1.0
+          ..strokeCap = StrokeCap.round,
+      );
+      if (i % 4 == 0 && fade > 0.2) {
+        canvas.drawCircle(end, 1.1 + hit * 0.8, Paint()..color = color.withValues(alpha: alpha * 0.72));
+      }
     }
   }
 

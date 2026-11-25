@@ -58,12 +58,30 @@ void main() {
       0.8, 0, 0.8, 0.6, 0.4, 0, 0.4, 0.5,
       null, null, 0, 0,
     );
-    expect(data.fighterClash, 1.0);
+    expect(data.fighterClashProgress, greaterThan(0));
+    for (var frame = 0; frame < 16; frame++) {
+      data.update(
+        Float32List(VisualizerData.bandCount),
+        0.8, 0, 0.8, 0.6, 0.4, 0, 0.4, 0.5,
+        null, null, 0, 0,
+      );
+    }
+    expect(data.fighterClashProgress, inInclusiveRange(0.34, 0.46));
+    expect(data.fighterClash, greaterThan(0.9));
 
     final next = ui.PictureRecorder();
     createPainter(VisualizerStyle.animeFighters, data, config, theme)
         .paint(ui.Canvas(next), const ui.Size(400, 800));
     next.endRecording().dispose();
+    for (var frame = 0; frame < 23; frame++) {
+      data.update(
+        Float32List(VisualizerData.bandCount),
+        0.8, 0, 0.8, 0.6, 0.4, 0, 0.4, 0.5,
+        null, null, 0, 0,
+      );
+    }
+    expect(data.fighterClash, 0);
+    expect(data.fighterClashProgress, 0);
     data.dispose();
     config.dispose();
   });

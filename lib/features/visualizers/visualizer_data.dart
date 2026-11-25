@@ -31,9 +31,11 @@ class VisualizerData extends ChangeNotifier {
   double duelLeftEnergy = 0;
   double duelRightEnergy = 0;
   double fighterClash = 0;
+  double fighterClashProgress = 0;
   int _bassOnsetWindow = 0;
   int _trebleOnsetWindow = 0;
   int _fighterClashCooldown = 0;
+  int _fighterClashFrame = -1;
   Float32List waveformLeft = Float32List(64);
   Float32List waveformRight = Float32List(64);
 
@@ -84,7 +86,7 @@ class VisualizerData extends ChangeNotifier {
 
     // A clash is armed only by fresh rises in both the bass and treble sources
     // inside a short coincidence window. The refractory period prevents rapid
-    // retriggering; its envelope is smoothed in update time, not by a new timer.
+    // retriggering; its animation advances with existing audio updates only.
     if (!_stopped) {
       if (bass - previousBass > 0.045 && bass > 0.28) {
         _bassOnsetWindow = 10;
@@ -100,17 +102,20 @@ class VisualizerData extends ChangeNotifier {
       if (_bassOnsetWindow > 0 &&
           _trebleOnsetWindow > 0 &&
           _fighterClashCooldown == 0) {
-        fighterClash = 1.0;
-        _fighterClashCooldown = 60;
+        _fighterClashFrame = 0;
+        fighterClash = 0;
+        fighterClashProgress = 0;
+        _fighterClashCooldown = 72;
         _bassOnsetWindow = 0;
         _trebleOnsetWindow = 0;
-      } else {
-        fighterClash *= 0.88;
       }
+      _advanceFighterClash();
     } else {
       _bassOnsetWindow = 0;
       _trebleOnsetWindow = 0;
-      fighterClash *= 0.82;
+      _fighterClashFrame = -1;
+      fighterClashProgress = 0;
+      fighterClash *= 0.72;
     }
 
     var dirty = false;
@@ -119,12 +124,49 @@ class VisualizerData extends ChangeNotifier {
       if ((v - values[i]).abs() > 0.0003) dirty = true;
       values[i] = v;
     }
-    if (!_stopped && (_history.isEmpty || _history.last.asMap().entries.any((e) => (e.value - values[e.key]).abs() > 0.025))) {
+    if (!_stopped &&
+        (_history.isEmpty ||
+            _history.last.asMap().entries.any(
+              (e) => (e.value - values[e.key]).abs() > 0.025,
+            ))) {
       _history.add(Float32List.fromList(values));
       if (_history.length > historyCapacity) _history.removeAt(0);
     }
     final clashDirty = (fighterClash - previousClash).abs() > 0.0003;
     if (dirty || clashDirty || !_stopped) notifyListeners();
+  }
+
+  void _advanceFighterClash() {
+    if (_fighterClashFrame < 0) {
+      fighterClash = 0;
+      fighterClashProgress = 0;
+      return;
+    }
+
+    const durationFrames = 40;
+    _fighterClashFrame++;
+    final progress =
+        (_fighterClashFrame / durationFrames).clamp(0.0, 1.0).toDouble();
+    fighterClashProgress = progress;
+
+    // 0.00–0.34: approach; 0.34–0.46: impact; 0.46–1.00: recoil.
+    if (progress < 0.34) {
+      final t = progress / 0.34;
+      fighterClash = 0.78 * t * t * (3 - 2 * t);
+    } else if (progress < 0.46) {
+      final t = (progress - 0.34) / 0.12;
+      fighterClash = 0.78 + 0.22 * t;
+    } else {
+      final t = ((progress - 0.46) / 0.54).clamp(0.0, 1.0).toDouble();
+      final eased = t * t * (3 - 2 * t);
+      fighterClash = 1 - eased;
+    }
+
+    if (_fighterClashFrame >= durationFrames) {
+      _fighterClashFrame = -1;
+      fighterClash = 0;
+      fighterClashProgress = 0;
+    }
   }
 
   double _filter(double current, double target, double smoothness) {
