@@ -239,77 +239,98 @@ class DuelPainter extends VisualizerPainter {
     double strength,
   ) {
     if (strength <= 0.01) return;
-    final pulse = 0.76 + 0.24 * math.sin(data.phase * 2.0).abs();
+    final beatPulse = math.sin(data.beatPhase).abs();
+    final pulse = 0.62 + 0.20 * math.sin(data.phase * 1.7).abs() + beatPulse * 0.18;
     canvas.drawCircle(
       center,
-      radius * (1.42 + strength * 0.12),
+      radius * (1.48 + strength * 0.16 + beatPulse * 0.025),
       Paint()
-        ..color = color.withValues(alpha: 0.085 * strength * pulse)
+        ..color = color.withValues(alpha: 0.10 * strength * pulse)
         ..maskFilter = config.glow
-            ? MaskFilter.blur(BlurStyle.normal, radius * 0.44)
+            ? MaskFilter.blur(BlurStyle.normal, radius * 0.50)
             : null,
     );
 
-    const tongues = 12;
-    final maxLength = radius * (0.34 + energy * 0.24) * (0.70 + strength * 0.30);
-    final maxHalfWidth = radius * (0.12 + energy * 0.035);
+    const tongues = 14;
+    final maxLength = radius * (0.32 + energy * 0.38) * (0.78 + strength * 0.22);
+    final maxHalfWidth = radius * (0.12 + energy * 0.045);
+    final flameShaderRect = Rect.fromLTRB(
+      -maxHalfWidth * 1.6,
+      radius * 0.55,
+      maxHalfWidth * 1.6,
+      radius + maxLength,
+    );
     final flamePaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
         colors: [
+          color.withValues(alpha: 0.05 * strength),
+          color.withValues(alpha: 0.36 * strength * pulse),
+          color.withValues(alpha: 0.24 * strength),
           color.withValues(alpha: 0.015 * strength),
-          color.withValues(alpha: 0.20 * strength),
-          color.withValues(alpha: 0.35 * strength * pulse),
-          color.withValues(alpha: 0.025 * strength),
         ],
-        stops: const [0.0, 0.36, 0.70, 1.0],
-      ).createShader(
-        Rect.fromLTRB(
-          -maxHalfWidth * 1.3,
-          radius * 0.66,
-          maxHalfWidth * 1.3,
-          radius + maxLength,
-        ),
-      )
+        stops: const [0.0, 0.25, 0.62, 1.0],
+      ).createShader(flameShaderRect)
+      ..blendMode = BlendMode.plus;
+    final hotCorePaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: [
+          Color.lerp(color, Colors.white, 0.12)!
+              .withValues(alpha: 0.24 * strength),
+          Color.lerp(color, Colors.white, 0.42)!
+              .withValues(alpha: 0.27 * strength * pulse),
+          color.withValues(alpha: 0.01 * strength),
+        ],
+        stops: const [0.0, 0.48, 1.0],
+      ).createShader(flameShaderRect)
       ..blendMode = BlendMode.plus;
     canvas.save();
     canvas.translate(center.dx, center.dy);
     for (var i = 0; i < tongues; i++) {
-      final flutter = 0.68 + 0.32 * math.sin(data.phase * 2.8 + i * 1.73).abs();
-      final length = radius * (0.34 + energy * 0.24) * flutter * (0.70 + strength * 0.30);
-      final halfWidth = radius * (0.12 + energy * 0.035) * flutter;
-      final angle = (math.pi * 2 * i / tongues) + data.phase * 0.045;
+      final flicker = 0.52 +
+          0.48 * math.sin(data.phase * (2.4 + (i % 4) * 0.31) + i * 2.17).abs();
+      final length = maxLength * flicker * (i.isEven ? 1.0 : 0.76);
+      final halfWidth = maxHalfWidth *
+          (0.70 + 0.30 * math.sin(data.phase * 1.9 + i * 1.41).abs());
+      final angle = (math.pi * 2 * i / tongues) + data.phase * 0.12;
+      final lean = math.sin(data.phase * 2.1 + i * 2.7) * halfWidth * 0.34;
       final path = Path()
-        ..moveTo(-halfWidth * 0.46, radius * 0.68)
+        ..moveTo(-halfWidth * 0.48, radius * 0.66)
         ..cubicTo(
-          -halfWidth * 1.20,
-          radius * 0.92,
-          -halfWidth * 0.32,
-          radius + length * 0.46,
-          0,
+          -halfWidth * 1.05,
+          radius * 0.90,
+          -halfWidth * 0.60 + lean,
+          radius + length * 0.48,
+          lean * 0.48,
           radius + length,
         )
         ..cubicTo(
-          halfWidth * 0.30,
-          radius + length * 0.48,
-          halfWidth * 1.16,
-          radius * 0.90,
-          halfWidth * 0.46,
-          radius * 0.68,
+          halfWidth * 0.24 + lean,
+          radius + length * 0.52,
+          halfWidth * 1.02,
+          radius * 0.88,
+          halfWidth * 0.48,
+          radius * 0.66,
         )
         ..cubicTo(
-          halfWidth * 0.18,
-          radius * 0.79,
-          -halfWidth * 0.20,
-          radius * 0.79,
-          -halfWidth * 0.46,
-          radius * 0.68,
+          halfWidth * 0.13,
+          radius * 0.78,
+          -halfWidth * 0.22,
+          radius * 0.77,
+          -halfWidth * 0.48,
+          radius * 0.66,
         )
         ..close();
       canvas.save();
       canvas.rotate(angle);
       canvas.drawPath(path, flamePaint);
+      canvas.save();
+      canvas.scale(0.44, 0.70);
+      canvas.drawPath(path, hotCorePaint);
+      canvas.restore();
       canvas.restore();
     }
     canvas.restore();
