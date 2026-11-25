@@ -85,6 +85,18 @@ class DuelPainter extends VisualizerPainter {
     }
     _drawCore(canvas, leftCenter, leftRadius, leftEnergy, leftColor, data.phase, true);
     _drawCore(canvas, rightCenter, rightRadius, rightEnergy, rightColor, -data.phase * 0.91, false);
+    _drawCenterOrb(
+      canvas,
+      center,
+      minSide,
+      balance,
+      leadStrength,
+      leftEnergy,
+      rightEnergy,
+      leftColor,
+      rightColor,
+      beatPulse,
+    );
 
     _drawCaption(
       canvas,
@@ -334,6 +346,81 @@ class DuelPainter extends VisualizerPainter {
       canvas.restore();
     }
     canvas.restore();
+  }
+
+  void _drawCenterOrb(
+    Canvas canvas,
+    Offset center,
+    double minSide,
+    double balance,
+    double leadStrength,
+    double leftEnergy,
+    double rightEnergy,
+    Color leftColor,
+    Color rightColor,
+    double beatPulse,
+  ) {
+    final launchPhase = 0.5 - 0.5 * math.cos(data.phase * 2.6);
+    final direction = balance.sign;
+    final travel = minSide * 0.19 * leadStrength * launchPhase;
+    final orbCenter = Offset(center.dx + direction * travel, center.dy);
+    final color = direction == 0
+        ? Color.lerp(leftColor, rightColor, 0.5)!
+        : (direction > 0 ? leftColor : rightColor);
+    final sharedEnergy = (leftEnergy + rightEnergy) * 0.5;
+    final orbRadius = minSide * (0.012 + sharedEnergy * 0.006 + beatPulse * 0.002);
+    final launchAlpha = 0.68 + leadStrength * launchPhase * 0.32;
+
+    if (travel > minSide * 0.006) {
+      final tail = Offset(orbCenter.dx - direction * orbRadius * 3.2, center.dy);
+      canvas.drawLine(
+        tail,
+        orbCenter,
+        Paint()
+          ..shader = LinearGradient(
+            colors: [
+              color.withValues(alpha: 0.0),
+              color.withValues(alpha: 0.16 * launchAlpha),
+              color.withValues(alpha: 0.46 * launchAlpha),
+            ],
+          ).createShader(Rect.fromPoints(tail, orbCenter))
+          ..strokeWidth = orbRadius * 0.82
+          ..strokeCap = StrokeCap.round
+          ..maskFilter = config.glow
+              ? MaskFilter.blur(BlurStyle.normal, orbRadius * 0.52)
+              : null,
+      );
+    }
+
+    canvas.drawCircle(
+      orbCenter,
+      orbRadius * 2.7,
+      Paint()
+        ..color = color.withValues(alpha: 0.20 * launchAlpha)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, orbRadius * 1.25),
+    );
+    canvas.drawCircle(
+      orbCenter,
+      orbRadius * 1.28,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.97 * launchAlpha),
+            Color.lerp(color, Colors.white, 0.36)!
+                .withValues(alpha: 0.96 * launchAlpha),
+            color.withValues(alpha: 0.88 * launchAlpha),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.30, 0.66, 1.0],
+        ).createShader(
+          Rect.fromCircle(center: orbCenter, radius: orbRadius * 1.28),
+        ),
+    );
+    canvas.drawCircle(
+      Offset(orbCenter.dx - orbRadius * 0.30, orbCenter.dy - orbRadius * 0.34),
+      orbRadius * 0.17,
+      Paint()..color = Colors.white.withValues(alpha: 0.88 * launchAlpha),
+    );
   }
 
   void _drawCaption(

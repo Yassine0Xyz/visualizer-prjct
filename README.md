@@ -41,7 +41,7 @@ and Bass vs Treble matchups.
 18. **Circular Wave** - Circular wave with spokes
 19. **Waterfall** - Scrolling spectrogram heatmap over time
 20. **Oscilloscope** - Separate left/right time-domain waveforms
-21. **Duel** - Fair, shared-scale head-to-head energy cores with a translucent flame aura that follows the leading side; choose Stereo L/R or Bass vs Treble in settings
+21. **Duel** - Fair, shared-scale head-to-head energy cores, a live leader-following flame aura, and a center orb that launches toward the trailing side; choose Stereo L/R or Bass vs Treble in settings
 
 ## Architecture
 
