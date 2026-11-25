@@ -89,7 +89,7 @@ class PrismBloomPainter extends VisualizerPainter {
               baseColor.withValues(alpha: alpha * 0.52),
             ],
             stops: const [0, 0.62, 1],
-          ).createShader(Rect.fromLTWH(-width, -length, width * 2, length)),
+          ).createShader(Rect.fromLTWH(-width, -length, width * 2, length))
           ..style = PaintingStyle.fill
           ..blendMode = BlendMode.screen,
       );
@@ -155,7 +155,7 @@ class PrismBloomPainter extends VisualizerPainter {
             colorAt(0.34, energy: energy, bass: bass).withValues(alpha: 0.82),
             baseColor.withValues(alpha: 0.42),
           ],
-        ).createShader(Rect.fromCircle(center: Offset.zero, radius: coreRadius)),
+        ).createShader(Rect.fromCircle(center: Offset.zero, radius: coreRadius))
         ..blendMode = BlendMode.screen,
     );
     canvas.drawCircle(

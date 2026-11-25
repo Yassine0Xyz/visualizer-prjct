@@ -86,6 +86,8 @@ class OrbitingParticlesPainter extends VisualizerPainter {
           .toDouble();
       final particleRadius = (0.75 + bandValue * 1.15 + (track == 0 ? bassDrive * 0.25 : 0.0))
           .clamp(0.65, 2.4)
+          .toDouble() * intensity
+          .clamp(0.6, 1.8)
           .toDouble();
 
       if (config.glow && (i % 3 == 0 || particleRadius > 1.8)) {
