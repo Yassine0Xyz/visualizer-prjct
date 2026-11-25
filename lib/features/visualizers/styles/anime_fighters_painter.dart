@@ -59,7 +59,7 @@ class AnimeFightersPainter extends VisualizerPainter {
       bassPeak,
       phase,
       clash,
-      strike,
+      strike: strike,
       mirrored: false,
       refined: false,
     );
@@ -73,7 +73,7 @@ class AnimeFightersPainter extends VisualizerPainter {
       treblePeak,
       -phase * 0.83,
       clash,
-      strike,
+      strike: strike,
       mirrored: true,
       refined: true,
     );
