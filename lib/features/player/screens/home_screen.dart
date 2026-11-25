@@ -179,7 +179,7 @@ class HomeScreen extends StatelessWidget {
 
                           const SizedBox(height: 40),
                           Text(
-                            '21 Visualizer Styles',
+                            '30 Visualizer Styles',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,

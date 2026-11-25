@@ -31,6 +31,7 @@ import 'styles/harmonic_skyline_painter.dart';
 import 'styles/liquid_chrome_painter.dart';
 import 'styles/orbiting_particles_painter.dart';
 import 'styles/fractal_bloom_painter.dart';
+import 'styles/anime_fighters_painter.dart';
 import 'visualizer_config.dart';
 import 'visualizer_data.dart';
 import 'visualizer_style.dart';
@@ -72,6 +73,7 @@ VisualizerPainter createPainter(
     VisualizerStyle.liquidChrome => LiquidChromePainter(data, config, theme),
     VisualizerStyle.orbitingParticles => OrbitingParticlesPainter(data, config, theme),
     VisualizerStyle.fractalBloom => FractalBloomPainter(data, config, theme),
+    VisualizerStyle.animeFighters => AnimeFightersPainter(data, config, theme),
   };
 }
 

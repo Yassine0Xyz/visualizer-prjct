@@ -41,6 +41,33 @@ void main() {
     config.dispose();
   });
 
+  test('Anime Fighters is independent and clashes on synchronized rises', () {
+    final data = VisualizerData()..setStopped(false);
+    final config = VisualizerConfig()..duelMode = DuelMode.bassVsTreble;
+    final theme = VisualizerThemeData.presets.first;
+    final painter = createPainter(VisualizerStyle.animeFighters, data, config, theme);
+    expect(painter, isNot(createPainter(VisualizerStyle.duel, data, config, theme)));
+    expect(config.duelMode, DuelMode.bassVsTreble);
+
+    final recorder = ui.PictureRecorder();
+    expect(() => painter.paint(ui.Canvas(recorder), const ui.Size(400, 800)), returnsNormally);
+    recorder.endRecording().dispose();
+
+    data.update(
+      Float32List(VisualizerData.bandCount),
+      0.8, 0, 0.8, 0.6, 0.4, 0, 0.4, 0.5,
+      null, null, 0, 0,
+    );
+    expect(data.fighterClash, 1.0);
+
+    final next = ui.PictureRecorder();
+    createPainter(VisualizerStyle.animeFighters, data, config, theme)
+        .paint(ui.Canvas(next), const ui.Size(400, 800));
+    next.endRecording().dispose();
+    data.dispose();
+    config.dispose();
+  });
+
   test('Duel victory aura follows the leading source in both modes', () {
     final data = VisualizerData();
     final config = VisualizerConfig();
@@ -71,8 +98,8 @@ void main() {
     config.dispose();
   });
 
-  test('all 29 visualizer styles create and paint without throwing', () {
-    expect(VisualizerStyle.values, hasLength(29));
+  test('all 30 visualizer styles create and paint without throwing', () {
+    expect(VisualizerStyle.values, hasLength(30));
     final data = VisualizerData();
     final config = VisualizerConfig();
     final theme = VisualizerThemeData.presets.first;

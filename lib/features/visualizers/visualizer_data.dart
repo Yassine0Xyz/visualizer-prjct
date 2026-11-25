@@ -30,6 +30,10 @@ class VisualizerData extends ChangeNotifier {
   double beatPhase = 0;
   double duelLeftEnergy = 0;
   double duelRightEnergy = 0;
+  double fighterClash = 0;
+  int _bassOnsetWindow = 0;
+  int _trebleOnsetWindow = 0;
+  int _fighterClashCooldown = 0;
   Float32List waveformLeft = Float32List(64);
   Float32List waveformRight = Float32List(64);
 
@@ -65,6 +69,9 @@ class VisualizerData extends ChangeNotifier {
       beatPhase += 0.008 + bassT * 0.04;
     }
 
+    final previousBass = bass;
+    final previousHigh = high;
+    final previousClash = fighterClash;
     bass = _filter(bass, bassT, smoothness);
     mid = _filter(mid, midT, smoothness);
     high = _filter(high, highT, smoothness);
@@ -74,6 +81,37 @@ class VisualizerData extends ChangeNotifier {
     highEnergy = _filter(highEnergy, highEnergyT, smoothness);
     duelLeftEnergy = _filter(duelLeftEnergy, duelLeftTarget, smoothness);
     duelRightEnergy = _filter(duelRightEnergy, duelRightTarget, smoothness);
+
+    // A clash is armed only by fresh rises in both the bass and treble sources
+    // inside a short coincidence window. The refractory period prevents rapid
+    // retriggering; its envelope is smoothed in update time, not by a new timer.
+    if (!_stopped) {
+      if (bass - previousBass > 0.045 && bass > 0.28) {
+        _bassOnsetWindow = 10;
+      } else if (_bassOnsetWindow > 0) {
+        _bassOnsetWindow--;
+      }
+      if (high - previousHigh > 0.045 && high > 0.30) {
+        _trebleOnsetWindow = 10;
+      } else if (_trebleOnsetWindow > 0) {
+        _trebleOnsetWindow--;
+      }
+      if (_fighterClashCooldown > 0) _fighterClashCooldown--;
+      if (_bassOnsetWindow > 0 &&
+          _trebleOnsetWindow > 0 &&
+          _fighterClashCooldown == 0) {
+        fighterClash = 1.0;
+        _fighterClashCooldown = 60;
+        _bassOnsetWindow = 0;
+        _trebleOnsetWindow = 0;
+      } else {
+        fighterClash *= 0.88;
+      }
+    } else {
+      _bassOnsetWindow = 0;
+      _trebleOnsetWindow = 0;
+      fighterClash *= 0.82;
+    }
 
     var dirty = false;
     for (var i = 0; i < values.length; i++) {
@@ -85,7 +123,8 @@ class VisualizerData extends ChangeNotifier {
       _history.add(Float32List.fromList(values));
       if (_history.length > historyCapacity) _history.removeAt(0);
     }
-    if (dirty || !_stopped) notifyListeners();
+    final clashDirty = (fighterClash - previousClash).abs() > 0.0003;
+    if (dirty || clashDirty || !_stopped) notifyListeners();
   }
 
   double _filter(double current, double target, double smoothness) {

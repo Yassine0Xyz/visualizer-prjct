@@ -29,7 +29,8 @@ enum VisualizerStyle {
   harmonicSkyline,
   liquidChrome,
   orbitingParticles,
-  fractalBloom;
+  fractalBloom,
+  animeFighters;
 
   String get label => switch (this) {
     VisualizerStyle.bars => 'Bars',
@@ -61,6 +62,7 @@ enum VisualizerStyle {
     VisualizerStyle.liquidChrome => 'Liquid Chrome',
     VisualizerStyle.orbitingParticles => 'Orbiting Particles',
     VisualizerStyle.fractalBloom => 'Fractal Bloom',
+    VisualizerStyle.animeFighters => 'Anime Fighters',
   };
 
   String get description => switch (this) {
@@ -93,6 +95,7 @@ enum VisualizerStyle {
     VisualizerStyle.liquidChrome => 'A sculpted chrome liquid form ripples with the sound.',
     VisualizerStyle.orbitingParticles => 'A constellation of particles follows harmonic orbits.',
     VisualizerStyle.fractalBloom => 'A branching, mirrored bloom unfolds with each frequency band.',
+    VisualizerStyle.animeFighters => 'Two neon-edged Bass and Treble sword fighters clash on synchronized audio peaks.',
   };
 
   IconData get icon => switch (this) {
@@ -125,5 +128,6 @@ enum VisualizerStyle {
     VisualizerStyle.liquidChrome => Icons.water_drop_rounded,
     VisualizerStyle.orbitingParticles => Icons.scatter_plot_rounded,
     VisualizerStyle.fractalBloom => Icons.local_florist_rounded,
+    VisualizerStyle.animeFighters => Icons.sports_kabaddi_rounded,
   };
 }

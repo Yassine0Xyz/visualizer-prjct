@@ -1,13 +1,13 @@
 # Audio Visualizer Lab V2
 
 A standalone Flutter application for researching and comparing high-quality,
-audio-reactive visualizers. Version 2 includes **29 implemented visualizer
+audio-reactive visualizers. Version 2 includes **30 implemented visualizer
 styles** and an updated analysis pipeline. Duel supports both Stereo L/R and
 Bass vs Treble matchups.
 
 ## Features V2
 
-- 29 unique visualizer styles, including a circular spectrogram, stereo Lissajous trace, and eight advanced visual experiences
+- 30 unique visualizer styles, including a circular spectrogram, stereo Lissajous trace, eight advanced visual experiences, and Anime Fighters
 - Real FFT analysis pipeline with 64 frequency bands
 - Enhanced audio reactivity: bass, mid, high, energy, and raw energy values
 - Premium dark UI with glassmorphism design
@@ -16,7 +16,7 @@ Bass vs Treble matchups.
 - Fullscreen immersive mode
 - Animated rendering with interpolated spectrum updates
 
-## 29 Visualizer Styles
+## 30 Visualizer Styles
 
 ### Original 9
 1. **Bars** - Classic spectrum bars
@@ -52,6 +52,7 @@ Bass vs Treble matchups.
 27. **Liquid Chrome** - A sculpted chrome liquid form ripples with the sound
 28. **Orbiting Particles** - A constellation of particles follows harmonic orbits
 29. **Fractal Bloom** - A branching, mirrored bloom unfolds with each frequency band
+30. **Anime Fighters** - An independent Blue Bass vs Purple Treble sword duel with rare audio-synchronized clashes; the original Duel mode remains unchanged
 
 ## Architecture
 
