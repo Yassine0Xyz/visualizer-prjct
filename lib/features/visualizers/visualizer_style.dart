@@ -21,7 +21,15 @@ enum VisualizerStyle {
   circularWave,
   waterfall,
   oscilloscope,
-  duel;
+  duel,
+  auroraFlow,
+  radialSpectrogram,
+  lissajousStereo,
+  prismBloom,
+  harmonicSkyline,
+  liquidChrome,
+  orbitingParticles,
+  fractalBloom;
 
   String get label => switch (this) {
     VisualizerStyle.bars => 'Bars',
@@ -45,6 +53,14 @@ enum VisualizerStyle {
     VisualizerStyle.waterfall => 'Waterfall',
     VisualizerStyle.oscilloscope => 'Oscilloscope',
     VisualizerStyle.duel => 'Duel',
+    VisualizerStyle.auroraFlow => 'Aurora Flow',
+    VisualizerStyle.radialSpectrogram => 'Radial Spectrogram',
+    VisualizerStyle.lissajousStereo => 'Lissajous Stereo',
+    VisualizerStyle.prismBloom => 'Prism Bloom',
+    VisualizerStyle.harmonicSkyline => 'Harmonic Skyline',
+    VisualizerStyle.liquidChrome => 'Liquid Chrome',
+    VisualizerStyle.orbitingParticles => 'Orbiting Particles',
+    VisualizerStyle.fractalBloom => 'Fractal Bloom',
   };
 
   String get description => switch (this) {
@@ -69,6 +85,14 @@ enum VisualizerStyle {
     VisualizerStyle.waterfall => 'Scrolling frequency heatmap over time.',
     VisualizerStyle.oscilloscope => 'Stereo waveform scope with a centered trace.',
     VisualizerStyle.duel => 'Two balanced energy cores compete across stereo channels.',
+    VisualizerStyle.auroraFlow => 'Silken, layered aurora ribbons breathe with the spectrum.',
+    VisualizerStyle.radialSpectrogram => 'A circular time-frequency map of recent audio history.',
+    VisualizerStyle.lissajousStereo => 'Left and right waveforms trace a luminous stereo figure.',
+    VisualizerStyle.prismBloom => 'A faceted, spectral flower expands with the music.',
+    VisualizerStyle.harmonicSkyline => 'A glowing cityscape shaped by bass and harmonics.',
+    VisualizerStyle.liquidChrome => 'A sculpted chrome liquid form ripples with the sound.',
+    VisualizerStyle.orbitingParticles => 'A constellation of particles follows harmonic orbits.',
+    VisualizerStyle.fractalBloom => 'A branching, mirrored bloom unfolds with each frequency band.',
   };
 
   IconData get icon => switch (this) {
@@ -93,5 +117,13 @@ enum VisualizerStyle {
     VisualizerStyle.waterfall => Icons.grid_view_rounded,
     VisualizerStyle.oscilloscope => Icons.multiline_chart_rounded,
     VisualizerStyle.duel => Icons.flash_on_rounded,
+    VisualizerStyle.auroraFlow => Icons.waves_rounded,
+    VisualizerStyle.radialSpectrogram => Icons.radar_rounded,
+    VisualizerStyle.lissajousStereo => Icons.multiline_chart_rounded,
+    VisualizerStyle.prismBloom => Icons.auto_awesome,
+    VisualizerStyle.harmonicSkyline => Icons.location_city_rounded,
+    VisualizerStyle.liquidChrome => Icons.water_drop_rounded,
+    VisualizerStyle.orbitingParticles => Icons.scatter_plot_rounded,
+    VisualizerStyle.fractalBloom => Icons.local_florist_rounded,
   };
 }

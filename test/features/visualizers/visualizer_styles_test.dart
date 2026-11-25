@@ -71,8 +71,8 @@ void main() {
     config.dispose();
   });
 
-  test('all 21 visualizer styles create and paint without throwing', () {
-    expect(VisualizerStyle.values, hasLength(21));
+  test('all 29 visualizer styles create and paint without throwing', () {
+    expect(VisualizerStyle.values, hasLength(29));
     final data = VisualizerData();
     final config = VisualizerConfig();
     final theme = VisualizerThemeData.presets.first;
@@ -80,6 +80,8 @@ void main() {
     final canvas = ui.Canvas(recorder);
 
     for (final style in VisualizerStyle.values) {
+      expect(style.label, isNotEmpty, reason: 'Missing label for $style');
+      expect(style.description, isNotEmpty, reason: 'Missing description for $style');
       final painter = createPainter(style, data, config, theme);
       expect(painter, isA<VisualizerPainter>(), reason: 'Missing painter for $style');
       expect(

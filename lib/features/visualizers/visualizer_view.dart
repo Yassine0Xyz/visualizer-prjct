@@ -23,6 +23,14 @@ import 'styles/waterfall_painter.dart';
 import 'styles/oscilloscope_painter.dart';
 import 'styles/duel_painter.dart';
 import 'styles/energy_wave_painter.dart';
+import 'styles/aurora_flow_painter.dart';
+import 'styles/radial_spectrogram_painter.dart';
+import 'styles/lissajous_stereo_painter.dart';
+import 'styles/prism_bloom_painter.dart';
+import 'styles/harmonic_skyline_painter.dart';
+import 'styles/liquid_chrome_painter.dart';
+import 'styles/orbiting_particles_painter.dart';
+import 'styles/fractal_bloom_painter.dart';
 import 'visualizer_config.dart';
 import 'visualizer_data.dart';
 import 'visualizer_style.dart';
@@ -56,6 +64,14 @@ VisualizerPainter createPainter(
     VisualizerStyle.waterfall => WaterfallPainter(data, config, theme),
     VisualizerStyle.oscilloscope => OscilloscopePainter(data, config, theme),
     VisualizerStyle.duel => DuelPainter(data, config, theme),
+    VisualizerStyle.auroraFlow => AuroraFlowPainter(data, config, theme),
+    VisualizerStyle.radialSpectrogram => RadialSpectrogramPainter(data, config, theme),
+    VisualizerStyle.lissajousStereo => LissajousStereoPainter(data, config, theme),
+    VisualizerStyle.prismBloom => PrismBloomPainter(data, config, theme),
+    VisualizerStyle.harmonicSkyline => HarmonicSkylinePainter(data, config, theme),
+    VisualizerStyle.liquidChrome => LiquidChromePainter(data, config, theme),
+    VisualizerStyle.orbitingParticles => OrbitingParticlesPainter(data, config, theme),
+    VisualizerStyle.fractalBloom => FractalBloomPainter(data, config, theme),
   };
 }
 

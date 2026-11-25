@@ -1,13 +1,13 @@
 # Audio Visualizer Lab V2
 
-A standalone Flutter application for researching and comparing
-high-quality, audio-reactive visualizers. Version 2 includes 21 implemented
-visualizer styles and an updated analysis pipeline. Duel supports both Stereo L/R
-and Bass vs Treble matchups.
+A standalone Flutter application for researching and comparing high-quality,
+audio-reactive visualizers. Version 2 includes **29 implemented visualizer
+styles** and an updated analysis pipeline. Duel supports both Stereo L/R and
+Bass vs Treble matchups.
 
 ## Features V2
 
-- 21 unique visualizer styles, including Waterfall, a stereo Oscilloscope, and the balanced Duel arena
+- 29 unique visualizer styles, including a circular spectrogram, stereo Lissajous trace, and eight advanced visual experiences
 - Real FFT analysis pipeline with 64 frequency bands
 - Enhanced audio reactivity: bass, mid, high, energy, and raw energy values
 - Premium dark UI with glassmorphism design
@@ -16,9 +16,9 @@ and Bass vs Treble matchups.
 - Fullscreen immersive mode
 - Animated rendering with interpolated spectrum updates
 
-## 21 Visualizer Styles
+## 29 Visualizer Styles
 
-### Original 9:
+### Original 9
 1. **Bars** - Classic spectrum bars
 2. **Wave** - Smooth interpolated wave
 3. **Columns** - Equalizer wall
@@ -29,7 +29,7 @@ and Bass vs Treble matchups.
 8. **Particles** - Orbiting particle field
 9. **Geometry** - Rotating low-poly rings
 
-### New and Updated Styles:
+### New and Updated Styles
 10. **Neon Bars** - Neon light bars with trails and tips
 11. **Bass Circle** - Pulsing circles with bass spikes
 12. **Frequency Rings** - Concentric rings with arc segments
@@ -42,6 +42,16 @@ and Bass vs Treble matchups.
 19. **Waterfall** - Scrolling spectrogram heatmap over time
 20. **Oscilloscope** - Separate left/right time-domain waveforms
 21. **Duel** - Fair, shared-scale head-to-head energy cores, a live leader-following flame aura, and a center orb that launches toward the trailing side; choose Stereo L/R or Bass vs Treble in settings
+
+### Advanced Visualizers
+22. **Aurora Flow** - Silken, layered aurora ribbons breathe with the spectrum
+23. **Radial Spectrogram** - A circular time-frequency map of recent audio history
+24. **Lissajous Stereo** - Left and right waveforms trace a luminous stereo figure
+25. **Prism Bloom** - A faceted, spectral flower expands with the music
+26. **Harmonic Skyline** - A glowing cityscape shaped by bass and harmonics
+27. **Liquid Chrome** - A sculpted chrome liquid form ripples with the sound
+28. **Orbiting Particles** - A constellation of particles follows harmonic orbits
+29. **Fractal Bloom** - A branching, mirrored bloom unfolds with each frequency band
 
 ## Architecture
 
