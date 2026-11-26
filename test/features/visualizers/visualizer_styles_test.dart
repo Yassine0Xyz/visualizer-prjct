@@ -116,6 +116,38 @@ void main() {
     config.dispose();
   });
 
+  test('Orbiting Particles and Fractal Bloom render across audio and screen ranges', () {
+    final data = VisualizerData();
+    final config = VisualizerConfig();
+    final theme = VisualizerThemeData.presets.first;
+    const sizes = [ui.Size(400, 800), ui.Size(800, 420), ui.Size(144, 256)];
+
+    for (final style in [VisualizerStyle.orbitingParticles, VisualizerStyle.fractalBloom]) {
+      final painter = createPainter(style, data, config, theme);
+      for (final level in [0.0, 0.35, 0.75, 1.0]) {
+        data.bass = level;
+        data.mid = (level * 0.82).clamp(0.0, 1.0).toDouble();
+        data.high = (level * 0.93).clamp(0.0, 1.0).toDouble();
+        data.energy = level;
+        data.phase = level * 120;
+        data.values.fillRange(0, data.values.length, level);
+
+        for (final size in sizes) {
+          final recorder = ui.PictureRecorder();
+          expect(
+            () => painter.paint(ui.Canvas(recorder), size),
+            returnsNormally,
+            reason: '$style failed at $level audio intensity on $size',
+          );
+          recorder.endRecording().dispose();
+        }
+      }
+    }
+
+    data.dispose();
+    config.dispose();
+  });
+
   test('all 30 visualizer styles create and paint without throwing', () {
     expect(VisualizerStyle.values, hasLength(30));
     final data = VisualizerData();
