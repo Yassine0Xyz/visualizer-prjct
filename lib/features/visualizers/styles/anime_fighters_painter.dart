@@ -20,15 +20,19 @@ class AnimeFightersPainter extends VisualizerPainter {
     final h = size.height;
     final minSide = math.min(w, h);
     final phase = data.phase.isFinite ? data.phase : 0.0;
-    final bass = _unit(data.bass);
-    final treble = _unit(data.high);
-    final bassPeak = _unit(data.bassEnergy);
-    final treblePeak = _unit(data.highEnergy);
+    // VisualizerData already smooths these envelopes; config controls how
+    // strongly that filtered signal is expressed by this particular scene.
+    final response = (config.sensitivity * config.intensity / 1.54)
+        .clamp(0.45, 2.0)
+        .toDouble();
+    final bass = _unit(data.bass * response);
+    final treble = _unit(data.high * response);
+    final bassPeak = _unit(data.bassEnergy * response);
+    final treblePeak = _unit(data.highEnergy * response);
     final clash = _unit(data.fighterClash);
     final clashProgress = _unit(data.fighterClashProgress);
-    final strike = (1 - (clashProgress - 0.41).abs() / 0.18)
-        .clamp(0.0, 1.0)
-        .toDouble();
+    final strike =
+        (1 - (clashProgress - 0.41).abs() / 0.18).clamp(0.0, 1.0).toDouble();
     final fighterScale = minSide * 0.335;
     final groundY = h * 0.70;
     final center = Offset(w * 0.5, groundY);
@@ -40,8 +44,10 @@ class AnimeFightersPainter extends VisualizerPainter {
     // response: weighty bass shoulder/stance motion vs precise treble motion.
     final bassIdle = math.sin(phase * 1.65) * 0.012;
     final trebleIdle = math.sin(phase * 2.13 + 1.2) * 0.010;
-    final bassDrive = (bass * 0.040 + bassPeak * 0.020).clamp(0.0, 0.055).toDouble();
-    final trebleDrive = (treble * 0.024 + treblePeak * 0.025).clamp(0.0, 0.050).toDouble();
+    final bassDrive =
+        (bass * 0.040 + bassPeak * 0.020).clamp(0.0, 0.075).toDouble();
+    final trebleDrive =
+        (treble * 0.030 + treblePeak * 0.030).clamp(0.0, 0.075).toDouble();
     final advance = clash * 0.145;
     final separation = w * 0.257;
     final blueFoot = Offset(w * 0.5 - separation + fighterScale * advance,
@@ -78,7 +84,9 @@ class AnimeFightersPainter extends VisualizerPainter {
       refined: true,
     );
 
-    _drawParticles(canvas, size, minSide, phase, bass, treble, clash);
+    if (config.particles && minSide >= 72) {
+      _drawParticles(canvas, size, minSide, phase, bass, treble, clash);
+    }
     if (clash > 0.015) {
       _drawClash(
         canvas,
@@ -160,7 +168,8 @@ class AnimeFightersPainter extends VisualizerPainter {
     final centerLine = Paint()
       ..color = Colors.white.withValues(alpha: 0.045 + clash * 0.04)
       ..strokeWidth = 0.7;
-    canvas.drawLine(Offset(center.dx, size.height * 0.19), Offset(center.dx, size.height * 0.70), centerLine);
+    canvas.drawLine(Offset(center.dx, size.height * 0.19),
+        Offset(center.dx, size.height * 0.70), centerLine);
   }
 
   void _drawFloor(Canvas canvas, Size size, Offset center, double unit,
@@ -188,13 +197,15 @@ class AnimeFightersPainter extends VisualizerPainter {
           _blue.withValues(alpha: 0.02),
           Colors.white.withValues(alpha: 0.12 + clash * 0.16),
           _purple.withValues(alpha: 0.02),
-        ]).createShader(Rect.fromLTWH(size.width * 0.08, horizonY, size.width * 0.84, 1))
+        ]).createShader(
+            Rect.fromLTWH(size.width * 0.08, horizonY, size.width * 0.84, 1))
         ..strokeWidth = 0.8 + clash * 0.8,
     );
     for (var i = 0; i < 5; i++) {
       final spread = (i + 1) / 5;
       final y = horizonY + unit * (0.05 + spread * 0.18);
-      final alpha = (0.025 * (1 - spread) + clash * 0.025).clamp(0.0, 0.07).toDouble();
+      final alpha =
+          (0.025 * (1 - spread) + clash * 0.025).clamp(0.0, 0.07).toDouble();
       canvas.drawLine(
         Offset(center.dx - size.width * spread * 0.48, y),
         Offset(center.dx + size.width * spread * 0.48, y),
@@ -202,11 +213,15 @@ class AnimeFightersPainter extends VisualizerPainter {
       );
     }
     final pulse = 0.75 + 0.25 * math.sin(phase * 1.1).abs();
-    for (final entry in [(_blue, -1.0), (_purple, 1.0)]) {
-      final x = center.dx + entry.$2 * unit * 0.48;
+    for (var side = -1; side <= 1; side += 2) {
+      final color = side < 0 ? _blue : _purple;
+      final x = center.dx + side * unit * 0.48;
       canvas.drawOval(
-        Rect.fromCenter(center: Offset(x, horizonY), width: unit * 0.38, height: unit * 0.035),
-        Paint()..color = entry.$1.withValues(alpha: 0.07 * pulse + clash * 0.08),
+        Rect.fromCenter(
+            center: Offset(x, horizonY),
+            width: unit * 0.38,
+            height: unit * 0.035),
+        Paint()..color = color.withValues(alpha: 0.07 * pulse + clash * 0.08),
       );
     }
   }
@@ -252,7 +267,8 @@ class AnimeFightersPainter extends VisualizerPainter {
       ..lineTo(0.205, 0.005)
       ..quadraticBezierTo(0.19, -0.13, 0.115, -0.30)
       ..close();
-    _fillOutlined(canvas, shadow, energyColor, outlineAlpha * 0.52, glow * 0.55, width: 0.006);
+    _fillOutlined(canvas, shadow, energyColor, outlineAlpha * 0.52, glow * 0.55,
+        width: 0.006);
 
     final rearLeg = Path()
       ..moveTo(-0.055, -0.37)
@@ -263,7 +279,8 @@ class AnimeFightersPainter extends VisualizerPainter {
       ..lineTo(-0.055, -0.10)
       ..lineTo(0.03, -0.29)
       ..close();
-    _fillOutlined(canvas, rearLeg, energyColor, outlineAlpha * 0.65, glow * 0.4, width: 0.006);
+    _fillOutlined(canvas, rearLeg, energyColor, outlineAlpha * 0.65, glow * 0.4,
+        width: 0.006);
 
     final frontLeg = Path()
       ..moveTo(0.025, -0.39)
@@ -274,7 +291,8 @@ class AnimeFightersPainter extends VisualizerPainter {
       ..lineTo(0.04, -0.10)
       ..lineTo(-0.045, -0.27)
       ..close();
-    _fillOutlined(canvas, frontLeg, energyColor, outlineAlpha, glow * 0.5, width: 0.007);
+    _fillOutlined(canvas, frontLeg, energyColor, outlineAlpha, glow * 0.5,
+        width: 0.007);
 
     // Long split coat tails read clearly at small sizes without facial detail.
     final coat = Path()
@@ -289,7 +307,8 @@ class AnimeFightersPainter extends VisualizerPainter {
       ..lineTo(0.145, -0.23)
       ..quadraticBezierTo(0.22, -0.43, 0.12, -0.59)
       ..close();
-    _fillOutlined(canvas, coat, energyColor, outlineAlpha * 0.78, glow * 0.55, width: 0.008);
+    _fillOutlined(canvas, coat, energyColor, outlineAlpha * 0.78, glow * 0.55,
+        width: 0.008);
 
     // Torso, shoulder guards, and raised collar form an athletic silhouette.
     final torso = Path()
@@ -302,7 +321,8 @@ class AnimeFightersPainter extends VisualizerPainter {
       ..lineTo(-0.12, -0.48)
       ..lineTo(-0.125, -0.62)
       ..close();
-    _fillOutlined(canvas, torso, energyColor, outlineAlpha, glow * 0.62, width: 0.009);
+    _fillOutlined(canvas, torso, energyColor, outlineAlpha, glow * 0.62,
+        width: 0.009);
 
     final shoulder = Path()
       ..moveTo(-0.12, -0.63)
@@ -310,14 +330,18 @@ class AnimeFightersPainter extends VisualizerPainter {
       ..lineTo(-0.17, -0.49)
       ..lineTo(-0.095, -0.52)
       ..close();
-    _fillOutlined(canvas, shoulder, energyColor, outlineAlpha * 0.78, glow * 0.35, width: 0.006);
+    _fillOutlined(
+        canvas, shoulder, energyColor, outlineAlpha * 0.78, glow * 0.35,
+        width: 0.006);
     final forwardShoulder = Path()
       ..moveTo(0.07, -0.64)
       ..quadraticBezierTo(0.16, -0.68, 0.18, -0.57)
       ..lineTo(0.13, -0.49)
       ..lineTo(0.065, -0.53)
       ..close();
-    _fillOutlined(canvas, forwardShoulder, energyColor, outlineAlpha, glow * 0.48, width: 0.007);
+    _fillOutlined(
+        canvas, forwardShoulder, energyColor, outlineAlpha, glow * 0.48,
+        width: 0.007);
 
     // Back arm is tucked; forward arm reaches toward the opposing blade.
     final backArm = Path()
@@ -327,7 +351,9 @@ class AnimeFightersPainter extends VisualizerPainter {
       ..lineTo(-0.035, -0.47)
       ..lineTo(-0.075, -0.55)
       ..close();
-    _fillOutlined(canvas, backArm, energyColor, outlineAlpha * 0.70, glow * 0.25, width: 0.005);
+    _fillOutlined(
+        canvas, backArm, energyColor, outlineAlpha * 0.70, glow * 0.25,
+        width: 0.005);
     final armReach = Path()
       ..moveTo(0.11, -0.60)
       ..quadraticBezierTo(0.17, -0.57, 0.19, -0.52)
@@ -336,7 +362,8 @@ class AnimeFightersPainter extends VisualizerPainter {
       ..lineTo(0.105, -0.48)
       ..lineTo(0.065, -0.54)
       ..close();
-    _fillOutlined(canvas, armReach, energyColor, outlineAlpha, glow * 0.40, width: 0.006);
+    _fillOutlined(canvas, armReach, energyColor, outlineAlpha, glow * 0.40,
+        width: 0.006);
 
     // Head is featureless and masked: hair silhouette points toward the rival.
     final head = Path()
@@ -347,7 +374,8 @@ class AnimeFightersPainter extends VisualizerPainter {
       ..lineTo(-0.055, -0.66)
       ..quadraticBezierTo(-0.105, -0.70, -0.085, -0.77)
       ..close();
-    _fillOutlined(canvas, head, energyColor, outlineAlpha, glow * 0.62, width: 0.008);
+    _fillOutlined(canvas, head, energyColor, outlineAlpha, glow * 0.62,
+        width: 0.008);
     final hair = Path()
       ..moveTo(-0.09, -0.755)
       ..lineTo(-0.15, -0.835)
@@ -360,11 +388,13 @@ class AnimeFightersPainter extends VisualizerPainter {
       ..lineTo(0.078, -0.78)
       ..quadraticBezierTo(0.005, -0.825, -0.09, -0.755)
       ..close();
-    _fillOutlined(canvas, hair, energyColor, outlineAlpha * 0.92, glow * 0.52, width: 0.007);
+    _fillOutlined(canvas, hair, energyColor, outlineAlpha * 0.92, glow * 0.52,
+        width: 0.007);
 
     // Sparse armor inlays catch light but leave most of the figure dark.
     final detailPaint = Paint()
-      ..color = energyColor.withValues(alpha: 0.30 + energy * 0.28 + peak * 0.18)
+      ..color =
+          energyColor.withValues(alpha: 0.30 + energy * 0.28 + peak * 0.18)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.006
       ..strokeCap = StrokeCap.round;
@@ -378,7 +408,8 @@ class AnimeFightersPainter extends VisualizerPainter {
     canvas.drawPath(inlay, detailPaint);
     canvas.drawLine(Offset(-0.09, -0.29), Offset(-0.145, -0.19), detailPaint);
 
-    _drawSword(canvas, energyColor, energy, peak, phase, clash, strike, refined, scale);
+    _drawSword(canvas, energyColor, energy, peak, phase, clash, strike, refined,
+        scale);
     canvas.restore();
   }
 
@@ -394,7 +425,9 @@ class AnimeFightersPainter extends VisualizerPainter {
     final tip = hilt + direction * (length + clash * 0.035);
     final root = hilt + direction * 0.018;
     final guard = Offset(hilt.dx + 0.026, hilt.dy - 0.026);
-    final pulse = (0.44 + energy * 0.22 + peak * 0.30 + clash * 0.22).clamp(0.0, 1.0).toDouble();
+    final pulse = (0.44 + energy * 0.22 + peak * 0.30 + clash * 0.22)
+        .clamp(0.0, 1.0)
+        .toDouble();
     final blade = Path()
       ..moveTo(root.dx + normal.dx * 0.014, root.dy + normal.dy * 0.014)
       ..lineTo(tip.dx + normal.dx * 0.009, tip.dy + normal.dy * 0.009)
@@ -404,7 +437,8 @@ class AnimeFightersPainter extends VisualizerPainter {
 
     if (strike > 0.025) {
       final oldAngle = bladeAngle - (refined ? 0.50 : 0.58) * strike;
-      final oldTip = hilt + Offset(math.cos(oldAngle), math.sin(oldAngle)) * length;
+      final oldTip =
+          hilt + Offset(math.cos(oldAngle), math.sin(oldAngle)) * length;
       final trail = Path()
         ..moveTo(oldTip.dx, oldTip.dy)
         ..quadraticBezierTo(
@@ -423,7 +457,9 @@ class AnimeFightersPainter extends VisualizerPainter {
           ..maskFilter = config.glow
               ? MaskFilter.blur(
                   BlurStyle.normal,
-                  (config.glowRadius * 0.11 / scale).clamp(0.005, 0.016).toDouble(),
+                  (config.glowRadius * 0.11 / scale)
+                      .clamp(0.005, 0.016)
+                      .toDouble(),
                 )
               : null
           ..blendMode = BlendMode.screen,
@@ -510,22 +546,33 @@ class AnimeFightersPainter extends VisualizerPainter {
       final local = i ~/ 2;
       final speed = 0.35 + (local % 5) * 0.11;
       final drift = (phase * speed + local * 2.399963) % (2 * math.pi);
-      final xUnit = side * (0.17 + ((local * 17) % 11) * 0.036) + math.sin(drift) * 0.024;
-      final yUnit = 0.20 + ((local * 23) % 17) * 0.038 + math.cos(drift * 0.8) * 0.022;
-      final point = Offset(size.width * 0.5 + xUnit * unit, size.height * yUnit);
+      final xUnit =
+          side * (0.17 + ((local * 17) % 11) * 0.036) + math.sin(drift) * 0.024;
+      final yUnit =
+          0.20 + ((local * 23) % 17) * 0.038 + math.cos(drift * 0.8) * 0.022;
+      final point =
+          Offset(size.width * 0.5 + xUnit * unit, size.height * yUnit);
       final energy = side < 0 ? bass : treble;
       final color = side < 0 ? _blue : _purple;
-      final shimmer = (0.24 + 0.30 * math.sin(drift * 1.7 + i).abs() + energy * 0.34 + clash * 0.30)
+      final shimmer = (0.24 +
+              0.30 * math.sin(drift * 1.7 + i).abs() +
+              energy * 0.34 +
+              clash * 0.30)
           .clamp(0.10, 0.88)
           .toDouble();
       final radius = 0.75 + (local % 3) * 0.30 + energy * 0.55 + clash * 0.55;
-      canvas.drawCircle(point, radius, Paint()..color = color.withValues(alpha: shimmer));
+      canvas.drawCircle(
+          point, radius, Paint()..color = color.withValues(alpha: shimmer));
       if (i % 4 == 0 && shimmer > 0.43) {
-        final tail = point - Offset(side * (3.0 + energy * 3.0), 4.0 + energy * 4.0);
-        canvas.drawLine(tail, point, Paint()
-          ..color = color.withValues(alpha: shimmer * 0.34)
-          ..strokeWidth = 0.75
-          ..strokeCap = StrokeCap.round);
+        final tail =
+            point - Offset(side * (3.0 + energy * 3.0), 4.0 + energy * 4.0);
+        canvas.drawLine(
+            tail,
+            point,
+            Paint()
+              ..color = color.withValues(alpha: shimmer * 0.34)
+              ..strokeWidth = 0.75
+              ..strokeCap = StrokeCap.round);
       }
     }
   }
@@ -541,7 +588,8 @@ class AnimeFightersPainter extends VisualizerPainter {
     final hit = (1 - (progress - 0.41).abs() / 0.18).clamp(0.0, 1.0).toDouble();
     final pulse = amount * (0.82 + 0.18 * math.sin(phase * 2.8).abs());
     final radius = unit * (0.035 + progress * 0.18);
-    final flashRect = Rect.fromCircle(center: point, radius: unit * (0.12 + hit * 0.06));
+    final flashRect =
+        Rect.fromCircle(center: point, radius: unit * (0.12 + hit * 0.06));
     canvas.drawCircle(
       point,
       unit * (0.06 + hit * 0.14),
@@ -550,17 +598,31 @@ class AnimeFightersPainter extends VisualizerPainter {
           Colors.white.withValues(alpha: 0.72 * hit),
           Color.lerp(_blue, _purple, 0.5)!.withValues(alpha: 0.34 * pulse),
           Colors.transparent,
-        ], stops: const [0, 0.22, 1]).createShader(flashRect.inflate(unit * hit)),
+        ], stops: const [
+          0,
+          0.22,
+          1
+        ]).createShader(flashRect.inflate(unit * hit)),
     );
     final ringPaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.42 * pulse)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0 + hit * 2.4;
     canvas.drawCircle(point, radius, ringPaint);
-    canvas.drawCircle(point, radius * 0.74,
-      Paint()..color = _blue.withValues(alpha: 0.32 * pulse)..style = PaintingStyle.stroke..strokeWidth = 1.3);
-    canvas.drawCircle(point, radius * 1.16,
-      Paint()..color = _purple.withValues(alpha: 0.30 * pulse)..style = PaintingStyle.stroke..strokeWidth = 1.1);
+    canvas.drawCircle(
+        point,
+        radius * 0.74,
+        Paint()
+          ..color = _blue.withValues(alpha: 0.32 * pulse)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.3);
+    canvas.drawCircle(
+        point,
+        radius * 1.16,
+        Paint()
+          ..color = _purple.withValues(alpha: 0.30 * pulse)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.1);
 
     // A tight white impact star sits at the exact crossing point.
     for (var i = 0; i < 8; i++) {
@@ -568,10 +630,14 @@ class AnimeFightersPainter extends VisualizerPainter {
       final direction = Offset(math.cos(angle), math.sin(angle));
       final start = point + direction * unit * 0.012;
       final end = point + direction * unit * (0.025 + hit * 0.085);
-      canvas.drawLine(start, end, Paint()
-        ..color = (i.isEven ? Colors.white : _blue).withValues(alpha: 0.62 * pulse)
-        ..strokeWidth = 0.8 + hit * 1.8
-        ..strokeCap = StrokeCap.round);
+      canvas.drawLine(
+          start,
+          end,
+          Paint()
+            ..color = (i.isEven ? Colors.white : _blue)
+                .withValues(alpha: 0.62 * pulse)
+            ..strokeWidth = 0.8 + hit * 1.8
+            ..strokeCap = StrokeCap.round);
     }
 
     // Sparks are seeded by index and phase (no randomness or per-frame objects
@@ -587,9 +653,15 @@ class AnimeFightersPainter extends VisualizerPainter {
       final start = point + direction * radiusNow;
       final end = start + direction * trailLength;
       final color = i % 3 == 0 ? Colors.white : (i.isEven ? _blue : _purple);
-      final alpha = (0.72 * pulse * fade * (0.62 + (i % 5) * 0.075)).clamp(0.0, 0.92).toDouble();
-      final tail = start - direction * trailLength * 0.56 +
-          Offset(-direction.dy, direction.dx) * math.sin(seed * 2.0) * unit * 0.012;
+      final alpha = (0.72 * pulse * fade * (0.62 + (i % 5) * 0.075))
+          .clamp(0.0, 0.92)
+          .toDouble();
+      final tail = start -
+          direction * trailLength * 0.56 +
+          Offset(-direction.dy, direction.dx) *
+              math.sin(seed * 2.0) *
+              unit *
+              0.012;
       final sparkPath = Path()
         ..moveTo(tail.dx, tail.dy)
         ..quadraticBezierTo(start.dx, start.dy, end.dx, end.dy);
@@ -602,67 +674,99 @@ class AnimeFightersPainter extends VisualizerPainter {
           ..strokeCap = StrokeCap.round,
       );
       if (i % 4 == 0 && fade > 0.2) {
-        canvas.drawCircle(end, 1.1 + hit * 0.8, Paint()..color = color.withValues(alpha: alpha * 0.72));
+        canvas.drawCircle(end, 1.1 + hit * 0.8,
+            Paint()..color = color.withValues(alpha: alpha * 0.72));
       }
     }
   }
 
-  void _drawLabels(Canvas canvas, Size size, double unit,
-      double bass, double treble, double clash) {
-    _label(canvas, Offset(size.width * 0.15, size.height * 0.145), 'BASS', 'BLUE FIGHTER', _blue, bass, true, unit);
-    _label(canvas, Offset(size.width * 0.85, size.height * 0.145), 'TREBLE', 'PURPLE FIGHTER', _purple, treble, false, unit);
+  void _drawLabels(Canvas canvas, Size size, double unit, double bass,
+      double treble, double clash) {
+    _label(canvas, Offset(size.width * 0.15, size.height * 0.145), 'BASS',
+        'BLUE FIGHTER', _blue, bass, true, unit);
+    _label(canvas, Offset(size.width * 0.85, size.height * 0.145), 'TREBLE',
+        'PURPLE FIGHTER', _purple, treble, false, unit);
+    final textScale = (unit / 150).clamp(0.62, 1.0).toDouble();
     final versus = TextPainter(
-      text: TextSpan(text: clash > 0.08 ? 'CLASH' : 'VS', style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.30 + clash * 0.60),
-        fontSize: clash > 0.08 ? 9 : 10,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 2.0,
-      )),
+      text: TextSpan(
+          text: clash > 0.08 ? 'CLASH' : 'VS',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.30 + clash * 0.60),
+            fontSize: (clash > 0.08 ? 9 : 10) * textScale,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 2.0,
+          )),
       textDirection: TextDirection.ltr,
     )..layout();
-    versus.paint(canvas, Offset(size.width * 0.5 - versus.width / 2, size.height * 0.17));
+    versus.paint(canvas,
+        Offset(size.width * 0.5 - versus.width / 2, size.height * 0.17));
   }
 
   void _label(Canvas canvas, Offset position, String title, String subtitle,
       Color color, double energy, bool left, double unit) {
     final width = unit * 0.70;
+    final textScale = (unit / 150).clamp(0.62, 1.0).toDouble();
     final align = left ? TextAlign.left : TextAlign.right;
     final text = TextPainter(
       text: TextSpan(children: [
-        TextSpan(text: '$title\n', style: TextStyle(color: color.withValues(alpha: 0.66 + energy * 0.25), fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 2.0)),
-        TextSpan(text: subtitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.32), fontSize: 7, fontWeight: FontWeight.w600, letterSpacing: 1.3)),
+        TextSpan(
+            text: '$title\n',
+            style: TextStyle(
+                color: color.withValues(alpha: 0.66 + energy * 0.25),
+                fontSize: 11 * textScale,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 2.0)),
+        TextSpan(
+            text: subtitle,
+            style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.32),
+                fontSize: 7 * textScale,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.3)),
       ]),
       textDirection: TextDirection.ltr,
       textAlign: align,
     )..layout(maxWidth: width);
-    text.paint(canvas, Offset(left ? position.dx : position.dx - text.width, position.dy));
+    text.paint(canvas,
+        Offset(left ? position.dx : position.dx - text.width, position.dy));
     final lineY = position.dy + text.height + 7;
     final lineStart = left ? position.dx : position.dx - width;
-    final lineEnd = left ? position.dx + width * (0.30 + energy * 0.34) : position.dx - width * (0.30 + energy * 0.34);
-    canvas.drawLine(Offset(lineStart, lineY), Offset(lineEnd, lineY), Paint()
-      ..color = color.withValues(alpha: 0.22 + energy * 0.40)
-      ..strokeWidth = 1.1
-      ..strokeCap = StrokeCap.round);
+    final lineEnd = left
+        ? position.dx + width * (0.30 + energy * 0.34)
+        : position.dx - width * (0.30 + energy * 0.34);
+    canvas.drawLine(
+        Offset(lineStart, lineY),
+        Offset(lineEnd, lineY),
+        Paint()
+          ..color = color.withValues(alpha: 0.22 + energy * 0.40)
+          ..strokeWidth = 1.1
+          ..strokeCap = StrokeCap.round);
   }
 
-  void _fillOutlined(Canvas canvas, Path path, Color color, double alpha,
-      double blur, {required double width}) {
+  void _fillOutlined(
+      Canvas canvas, Path path, Color color, double alpha, double blur,
+      {required double width}) {
     canvas.drawPath(path, Paint()..color = _silhouette);
     if (config.glow && blur > 0) {
-      canvas.drawPath(path, Paint()
-        ..color = color.withValues(alpha: alpha * 0.20)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = width * 3.4
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, blur)
-        ..blendMode = BlendMode.screen);
+      canvas.drawPath(
+          path,
+          Paint()
+            ..color = color.withValues(alpha: alpha * 0.20)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = width * 3.4
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, blur)
+            ..blendMode = BlendMode.screen);
     }
-    canvas.drawPath(path, Paint()
-      ..color = color.withValues(alpha: alpha)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = width
-      ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round);
+    canvas.drawPath(
+        path,
+        Paint()
+          ..color = color.withValues(alpha: alpha)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = width
+          ..strokeJoin = StrokeJoin.round
+          ..strokeCap = StrokeCap.round);
   }
 
-  double _unit(double value) => value.isFinite ? value.clamp(0.0, 1.0).toDouble() : 0.0;
+  double _unit(double value) =>
+      value.isFinite ? value.clamp(0.0, 1.0).toDouble() : 0.0;
 }

@@ -11,10 +11,13 @@ class HoloArenaPainter extends VisualizerPainter {
     if (size.isEmpty) return;
     paintBackground(canvas, size);
     final minDim = math.min(size.width, size.height);
+    if (minDim < 1) return;
     final center = Offset(size.width * 0.5, size.height * 0.46);
-    final energy = _unit(data.energy);
-    final bass = _unit(data.bass);
-    final high = _unit(data.high);
+    final sensitivity = config.sensitivity * config.intensity;
+    final energy = _unit(data.energy * sensitivity);
+    final bass = _unit(data.bass * config.sensitivity * config.bassBoost);
+    final high = _unit(data.high * sensitivity);
+    final mid = _unit(data.mid * sensitivity);
     final phase = data.phase.isFinite ? data.phase : 0.0;
     final accent = colorAt(0.68, energy: energy, bass: bass);
     final secondary = colorAt(0.12 + high * 0.22, energy: energy, bass: bass);
@@ -37,13 +40,15 @@ class HoloArenaPainter extends VisualizerPainter {
       final t = row / 6;
       final eased = t * t;
       final y = horizonY + eased * (floorBottom - horizonY);
-      canvas.drawLine(Offset(size.width * 0.04, y), Offset(size.width * 0.96, y), gridPaint);
+      canvas.drawLine(Offset(size.width * 0.04, y),
+          Offset(size.width * 0.96, y), gridPaint);
     }
 
     // Holographic arena boundary: clipped-corner plate and layered scan arcs.
     final arenaWidth = math.min(size.width * 0.88, minDim * 0.88);
-    final arenaHeight = math.min(size.height * 0.53, minDim * 0.88);
-    final rect = Rect.fromCenter(center: center, width: arenaWidth, height: arenaHeight);
+    final arenaHeight = math.min(size.height * 0.53, minDim * 0.76);
+    final rect =
+        Rect.fromCenter(center: center, width: arenaWidth, height: arenaHeight);
     final cut = minDim * 0.045;
     final plate = Path()
       ..moveTo(rect.left + cut, rect.top)
@@ -75,7 +80,8 @@ class HoloArenaPainter extends VisualizerPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 5
           ..color = accent.withValues(alpha: 0.10 + energy * 0.06)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, (config.glowRadius * 0.24).clamp(0.8, 4.0).toDouble()),
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal,
+              (config.glowRadius * 0.24).clamp(0.8, 4.0).toDouble()),
       );
     }
     canvas.drawPath(
@@ -116,7 +122,7 @@ class HoloArenaPainter extends VisualizerPainter {
     );
 
     // Reactor rings: bass drives radius, treble drives fine radial ticks.
-    final reactorRadius = minDim * (0.11 + bass * 0.025);
+    final reactorRadius = minDim * (0.085 + bass * 0.035 + mid * 0.008);
     for (var ring = 0; ring < 3; ring++) {
       final radius = reactorRadius * (1.22 + ring * 0.48);
       final color = ring.isEven ? accent : secondary;
@@ -129,7 +135,8 @@ class HoloArenaPainter extends VisualizerPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 5
           ..color = color.withValues(alpha: 0.10 + energy * 0.06)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, (config.glowRadius * 0.24).clamp(0.8, 4.0).toDouble());
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal,
+              (config.glowRadius * 0.24).clamp(0.8, 4.0).toDouble());
         canvas.drawCircle(center, radius, bloomPaint);
       }
       canvas.drawCircle(center, radius, ringPaint);
@@ -147,30 +154,30 @@ class HoloArenaPainter extends VisualizerPainter {
     }
 
     final bands = data.values;
-    if (bands.isNotEmpty) {
+    if (bands.isNotEmpty && reactorRadius > 0) {
       final tickCount = math.min(48, bands.length * 2).toInt();
+      final tickPaint = Paint()..strokeCap = StrokeCap.round;
       for (var i = 0; i < tickCount; i++) {
-        final bandIndex = (i * bands.length ~/ tickCount).clamp(0, bands.length - 1).toInt();
+        final bandIndex =
+            (i * bands.length ~/ tickCount).clamp(0, bands.length - 1).toInt();
         final value = _unit(bands[bandIndex]);
         final angle = 2 * math.pi * i / tickCount - math.pi / 2 + phase * 0.018;
         final inner = reactorRadius * 1.84;
-        final outer = inner + minDim * (0.018 + value * 0.045);
+        final outer =
+            inner + minDim * (0.012 + value * 0.05 * config.intensity);
         final a = center + Offset(math.cos(angle), math.sin(angle)) * inner;
         final b = center + Offset(math.cos(angle), math.sin(angle)) * outer;
-        canvas.drawLine(
-          a,
-          b,
-          Paint()
-            ..color = colorAt(i / tickCount, energy: energy, bass: bass)
-                .withValues(alpha: 0.30 + value * 0.60)
-            ..strokeWidth = 0.7 + value * 1.3
-            ..strokeCap = StrokeCap.round,
-        );
+        tickPaint
+          ..color = colorAt(i / tickCount, energy: energy, bass: bass)
+              .withValues(alpha: 0.28 + value * 0.62)
+          ..strokeWidth = 0.65 + value * 1.45;
+        canvas.drawLine(a, b, tickPaint);
       }
     }
 
     // Compact energy core with a narrow bloom, never a full-screen haze.
-    final coreRect = Rect.fromCircle(center: center, radius: reactorRadius * 1.2);
+    final coreRect =
+        Rect.fromCircle(center: center, radius: reactorRadius * 1.2);
     if (config.glow) {
       canvas.drawCircle(
         center,
@@ -180,7 +187,11 @@ class HoloArenaPainter extends VisualizerPainter {
             accent.withValues(alpha: 0.18 + energy * 0.12),
             secondary.withValues(alpha: 0.08 + high * 0.06),
             Colors.transparent,
-          ], stops: const [0.0, 0.48, 1.0]).createShader(coreRect)
+          ], stops: const [
+            0.0,
+            0.48,
+            1.0
+          ]).createShader(coreRect)
           ..blendMode = BlendMode.screen,
       );
     }
@@ -192,11 +203,16 @@ class HoloArenaPainter extends VisualizerPainter {
           Colors.white.withValues(alpha: 0.88),
           accent.withValues(alpha: 0.84),
           secondary.withValues(alpha: 0.35),
-        ], stops: const [0.0, 0.38, 1.0]).createShader(
+        ], stops: const [
+          0.0,
+          0.38,
+          1.0
+        ]).createShader(
           Rect.fromCircle(center: center, radius: reactorRadius * 0.62),
         ),
     );
   }
 
-  double _unit(double value) => value.isFinite ? value.clamp(0.0, 1.0).toDouble() : 0.0;
+  double _unit(double value) =>
+      value.isFinite ? value.clamp(0.0, 1.0).toDouble() : 0.0;
 }
