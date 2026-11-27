@@ -12,6 +12,8 @@ class CircularWavePainter extends VisualizerPainter {
     final center = size.center(Offset.zero);
     final minDim = math.min(size.width, size.height);
     final n = data.values.length;
+    if (n < 2 || minDim <= 0) return;
+    final waveScale = config.intensity.clamp(0.5, 1.2).toDouble();
 
     // Circular wave spectrum
     final ringCount = 2;
@@ -25,7 +27,7 @@ class CircularWavePainter extends VisualizerPainter {
       for (var i = 0; i <= segments; i++) {
         final angle = 2 * math.pi * i / segments - math.pi / 2 + data.phase * 0.3;
         final v = data.values[i % n];
-        final radius = baseRadius + v * minDim * 0.12 * config.intensity;
+        final radius = baseRadius + v * minDim * 0.10 * waveScale;
 
         points.add(center + Offset(math.cos(angle), math.sin(angle)) * radius);
       }

@@ -319,10 +319,34 @@ class _StyleCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                style.icon,
-                color: selected ? scheme.primary : Colors.white60,
-                size: 28,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    style.icon,
+                    color: selected ? scheme.primary : Colors.white60,
+                    size: 28,
+                  ),
+                  const Spacer(),
+                  if (style.isModifiedCopy)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: scheme.secondary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: scheme.secondary.withValues(alpha: 0.30)),
+                      ),
+                      child: Text(
+                        'نسخة معدّلة',
+                        style: TextStyle(
+                          color: scheme.secondary,
+                          fontSize: 9,
+                          height: 1,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const Spacer(),
               Text(

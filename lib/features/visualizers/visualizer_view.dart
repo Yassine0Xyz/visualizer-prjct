@@ -32,6 +32,11 @@ import 'styles/liquid_chrome_painter.dart';
 import 'styles/orbiting_particles_painter.dart';
 import 'styles/fractal_bloom_painter.dart';
 import 'styles/anime_fighters_painter.dart';
+import 'styles/neon_afterglow_painter.dart';
+import 'styles/orbiting_particles_halo_painter.dart';
+import 'styles/fractal_bloom_nightgarden_painter.dart';
+import 'styles/nebula_rift_painter.dart';
+import 'styles/holo_arena_painter.dart';
 import 'visualizer_config.dart';
 import 'visualizer_data.dart';
 import 'visualizer_style.dart';
@@ -74,6 +79,11 @@ VisualizerPainter createPainter(
     VisualizerStyle.orbitingParticles => OrbitingParticlesPainter(data, config, theme),
     VisualizerStyle.fractalBloom => FractalBloomPainter(data, config, theme),
     VisualizerStyle.animeFighters => AnimeFightersPainter(data, config, theme),
+    VisualizerStyle.neonAfterglow => NeonAfterglowPainter(data, config, theme),
+    VisualizerStyle.orbitingHalo => OrbitingParticlesHaloPainter(data, config, theme),
+    VisualizerStyle.nightGarden => FractalBloomNightGardenPainter(data, config, theme),
+    VisualizerStyle.nebulaRift => NebulaRiftPainter(data, config, theme),
+    VisualizerStyle.holoArena => HoloArenaPainter(data, config, theme),
   };
 }
 

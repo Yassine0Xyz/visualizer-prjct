@@ -30,7 +30,26 @@ enum VisualizerStyle {
   liquidChrome,
   orbitingParticles,
   fractalBloom,
-  animeFighters;
+  animeFighters,
+  neonAfterglow,
+  orbitingHalo,
+  nightGarden,
+  nebulaRift,
+  holoArena;
+
+  bool get isModifiedCopy => switch (this) {
+    VisualizerStyle.neonAfterglow ||
+    VisualizerStyle.orbitingHalo ||
+    VisualizerStyle.nightGarden => true,
+    _ => false,
+  };
+
+  String? get copySource => switch (this) {
+    VisualizerStyle.neonAfterglow => 'Neon Bars',
+    VisualizerStyle.orbitingHalo => 'Orbiting Particles',
+    VisualizerStyle.nightGarden => 'Fractal Bloom',
+    _ => null,
+  };
 
   String get label => switch (this) {
     VisualizerStyle.bars => 'Bars',
@@ -63,6 +82,11 @@ enum VisualizerStyle {
     VisualizerStyle.orbitingParticles => 'Orbiting Particles',
     VisualizerStyle.fractalBloom => 'Fractal Bloom',
     VisualizerStyle.animeFighters => 'Anime Fighters',
+    VisualizerStyle.neonAfterglow => 'Neon Afterglow',
+    VisualizerStyle.orbitingHalo => 'Orbiting Halo',
+    VisualizerStyle.nightGarden => 'Night Garden',
+    VisualizerStyle.nebulaRift => 'Nebula Rift',
+    VisualizerStyle.holoArena => 'Holo Arena',
   };
 
   String get description => switch (this) {
@@ -96,6 +120,11 @@ enum VisualizerStyle {
     VisualizerStyle.orbitingParticles => 'A constellation of particles follows harmonic orbits.',
     VisualizerStyle.fractalBloom => 'A branching, mirrored bloom unfolds with each frequency band.',
     VisualizerStyle.animeFighters => 'Two neon-edged Bass and Treble sword fighters clash on synchronized audio peaks.',
+    VisualizerStyle.neonAfterglow => 'A refined Neon Bars variation with glassy trails and spectral glints.',
+    VisualizerStyle.orbitingHalo => 'Orbiting Particles enhanced with layered halos and bright satellites.',
+    VisualizerStyle.nightGarden => 'A Fractal Bloom variation accented with luminous audio-reactive petals.',
+    VisualizerStyle.nebulaRift => 'A deep-space rift surrounded by drifting nebula clouds and a living starfield.',
+    VisualizerStyle.holoArena => 'A next-generation game arena HUD with a perspective grid and spectrum reactor.',
   };
 
   IconData get icon => switch (this) {
@@ -129,5 +158,10 @@ enum VisualizerStyle {
     VisualizerStyle.orbitingParticles => Icons.scatter_plot_rounded,
     VisualizerStyle.fractalBloom => Icons.local_florist_rounded,
     VisualizerStyle.animeFighters => Icons.sports_kabaddi_rounded,
+    VisualizerStyle.neonAfterglow => Icons.lightbulb_outline,
+    VisualizerStyle.orbitingHalo => Icons.scatter_plot_rounded,
+    VisualizerStyle.nightGarden => Icons.local_florist_rounded,
+    VisualizerStyle.nebulaRift => Icons.blur_circular_rounded,
+    VisualizerStyle.holoArena => Icons.sports_esports_rounded,
   };
 }

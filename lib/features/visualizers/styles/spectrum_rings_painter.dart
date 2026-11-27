@@ -12,6 +12,8 @@ class SpectrumRingsPainter extends VisualizerPainter {
     final center = size.center(Offset.zero);
     final minDim = math.min(size.width, size.height);
     final n = data.values.length;
+    if (n < 2 || minDim <= 0) return;
+    final spectrumScale = config.intensity.clamp(0.5, 1.2).toDouble();
 
     // Rotating spectrum as concentric rings
     final ringCount = 5;
@@ -27,7 +29,7 @@ class SpectrumRingsPainter extends VisualizerPainter {
         final angle = 2 * math.pi * i / segments + rotation;
         final bandIdx = (i / segments * n * 0.5 + ring * n * 0.1).round() % n;
         final v = data.values[bandIdx];
-        final radius = baseRadius * (1 + v * 0.35 * config.intensity);
+        final radius = baseRadius * (1 + v * 0.30 * spectrumScale);
 
         points.add(center + Offset(math.cos(angle), math.sin(angle)) * radius);
       }

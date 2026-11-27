@@ -13,7 +13,7 @@ class FrequencyRingsPainter extends VisualizerPainter {
     final center = size.center(Offset.zero);
     final minDimension = math.min(size.width, size.height);
     final count = data.values.length;
-    if (count == 0) return;
+    if (count == 0 || minDimension <= 0) return;
 
     const ringCount = 8;
     const segmentCount = 12;
@@ -36,7 +36,7 @@ class FrequencyRingsPainter extends VisualizerPainter {
           ..color = color.withValues(alpha: 0.38 + value * 0.58)
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round
-          ..strokeWidth = 1.5 + value * 2.2;
+          ..strokeWidth = math.min(1.2 + value * 1.8, minDimension * 0.012).toDouble();
         if (config.glow && value > 0.35) {
           paint.maskFilter = MaskFilter.blur(BlurStyle.normal, config.glowRadius * 0.55);
         }

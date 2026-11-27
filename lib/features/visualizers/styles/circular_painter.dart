@@ -14,8 +14,10 @@ class CircularPainter extends VisualizerPainter {
 
     final center = size.center(Offset.zero);
     final n = data.values.length;
-    final baseR = math.min(size.width, size.height) * 0.16;
-    final maxLen = math.min(size.width, size.height) * 0.30 * config.intensity;
+    final minDim = math.min(size.width, size.height);
+    if (n < 2 || minDim <= 0) return;
+    final baseR = minDim * 0.14;
+    final maxLen = minDim * 0.28 * config.intensity.clamp(0.3, 1.2).toDouble();
     final rot = data.phase;
 
     // Inner ring.

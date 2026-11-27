@@ -148,8 +148,8 @@ void main() {
     config.dispose();
   });
 
-  test('all 30 visualizer styles create and paint without throwing', () {
-    expect(VisualizerStyle.values, hasLength(30));
+  test('all visualizer styles create and paint without throwing', () {
+    expect(VisualizerStyle.values, hasLength(35));
     final data = VisualizerData();
     final config = VisualizerConfig();
     final theme = VisualizerThemeData.presets.first;
@@ -169,6 +169,62 @@ void main() {
     }
 
     recorder.endRecording().dispose();
+    data.dispose();
+    config.dispose();
+  });
+
+  test('modified visualizer variants expose their source styles', () {
+    expect(VisualizerStyle.neonAfterglow.isModifiedCopy, isTrue);
+    expect(VisualizerStyle.neonAfterglow.copySource, 'Neon Bars');
+    expect(VisualizerStyle.orbitingHalo.copySource, 'Orbiting Particles');
+    expect(VisualizerStyle.nightGarden.copySource, 'Fractal Bloom');
+    expect(VisualizerStyle.neonBars.isModifiedCopy, isFalse);
+
+    final data = VisualizerData();
+    final config = VisualizerConfig();
+    final theme = VisualizerThemeData.presets.first;
+    for (final style in [
+      VisualizerStyle.neonAfterglow,
+      VisualizerStyle.orbitingHalo,
+      VisualizerStyle.nightGarden,
+    ]) {
+      final recorder = ui.PictureRecorder();
+      expect(
+        () => createPainter(style, data, config, theme)
+            .paint(ui.Canvas(recorder), const ui.Size(144, 256)),
+        returnsNormally,
+      );
+      recorder.endRecording().dispose();
+    }
+    data.dispose();
+    config.dispose();
+  });
+
+  test('Nebula Rift and Holo Arena render at compact, portrait, and landscape sizes', () {
+    final data = VisualizerData();
+    final config = VisualizerConfig();
+    final theme = VisualizerThemeData.presets.first;
+    const sizes = [ui.Size(144, 256), ui.Size(400, 800), ui.Size(800, 420)];
+    for (final style in [VisualizerStyle.nebulaRift, VisualizerStyle.holoArena]) {
+      for (final level in [0.0, 0.45, 1.0]) {
+        data.energy = level;
+        data.bass = level * 0.82;
+        data.mid = level * 0.67;
+        data.high = level * 0.91;
+        data.phase = level * 37;
+        data.values.fillRange(0, data.values.length, level);
+        final painter = createPainter(style, data, config, theme);
+        for (final size in sizes) {
+          final recorder = ui.PictureRecorder();
+          expect(
+            () => painter.paint(ui.Canvas(recorder), size),
+            returnsNormally,
+            reason: '$style failed at level $level on $size',
+          );
+          recorder.endRecording().dispose();
+        }
+      }
+    }
     data.dispose();
     config.dispose();
   });
