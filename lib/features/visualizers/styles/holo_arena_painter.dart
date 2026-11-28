@@ -1,217 +1,242 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import '../base/visualizer_painter.dart';
 
-/// A futuristic game arena HUD with a perspective floor and a live spectrum reactor.
+/// A holographic arena with a measured platform and a live audio reactor.
 class HoloArenaPainter extends VisualizerPainter {
   HoloArenaPainter(super.data, super.config, super.theme);
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (size.isEmpty) return;
+    if (!size.width.isFinite || !size.height.isFinite || size.isEmpty) return;
     paintBackground(canvas, size);
-    final minDim = math.min(size.width, size.height);
-    if (minDim < 1) return;
-    final center = Offset(size.width * 0.5, size.height * 0.46);
-    final sensitivity = config.sensitivity * config.intensity;
-    final energy = _unit(data.energy * sensitivity);
-    final bass = _unit(data.bass * config.sensitivity * config.bassBoost);
-    final high = _unit(data.high * sensitivity);
-    final mid = _unit(data.mid * sensitivity);
-    final phase = data.phase.isFinite ? data.phase : 0.0;
-    final accent = colorAt(0.68, energy: energy, bass: bass);
-    final secondary = colorAt(0.12 + high * 0.22, energy: energy, bass: bass);
 
-    // Perspective floor grid converges toward the reactor, with bounded line count.
-    final horizonY = size.height * 0.64;
-    final floorBottom = size.height * 0.98;
-    final gridPaint = Paint()
+    final minDim = math.min(size.width, size.height);
+    if (minDim < 8) return;
+    final sensitivity = _safe(config.sensitivity, fallback: 1).clamp(0.0, 4.0);
+    final intensity = _safe(config.intensity, fallback: 1).clamp(0.0, 2.5);
+    final bass =
+        _unit(data.bass * sensitivity * _safe(config.bassBoost, fallback: 1));
+    final mid = _unit(data.mid * sensitivity);
+    final high = _unit(data.high * sensitivity);
+    final energy = _unit(data.energy * sensitivity);
+    final phase = data.phase.isFinite ? data.phase % (math.pi * 2) : 0.0;
+    final primary = colorAt(0.62, energy: energy, bass: bass);
+    final cool = colorAt(0.08 + high * 0.16, energy: energy, bass: bass);
+
+    final cx = size.width * 0.5;
+    final platformY = size.height * 0.72;
+    final center = Offset(cx, size.height * 0.43);
+    final platformW = math.min(size.width * 0.84, minDim * 1.18);
+    final platformH = math.min(size.height * 0.34, minDim * 0.43);
+    final platform = Rect.fromCenter(
+      center: Offset(cx, platformY),
+      width: platformW,
+      height: platformH,
+    );
+
+    // Restrained perspective floor: a few converging seams and floor contours.
+    final floorPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.7
-      ..color = accent.withValues(alpha: 0.10 + energy * 0.08);
-    for (var line = -5; line <= 5; line++) {
-      final bottomX = size.width * (0.5 + line * 0.16);
-      final path = Path()
-        ..moveTo(size.width * 0.5 + line * minDim * 0.018, horizonY)
-        ..lineTo(bottomX, floorBottom);
-      canvas.drawPath(path, gridPaint);
+      ..color = primary.withValues(alpha: 0.09 + energy * 0.06);
+    for (var i = -3; i <= 3; i++) {
+      final spread = i * platformW * 0.105;
+      canvas.drawLine(
+        Offset(cx + spread * 0.28, platformY + platformH * 0.12),
+        Offset(cx + spread * 1.55, size.height * 0.99),
+        floorPaint,
+      );
     }
-    for (var row = 0; row < 7; row++) {
-      final t = row / 6;
-      final eased = t * t;
-      final y = horizonY + eased * (floorBottom - horizonY);
-      canvas.drawLine(Offset(size.width * 0.04, y),
-          Offset(size.width * 0.96, y), gridPaint);
+    for (var i = 0; i < 4; i++) {
+      final t = (i + 1) / 4;
+      final y = platformY +
+          platformH * 0.12 +
+          (size.height * 0.99 - platformY - platformH * 0.12) * t * t;
+      canvas.drawLine(Offset(cx - platformW * 0.55, y),
+          Offset(cx + platformW * 0.55, y), floorPaint);
     }
 
-    // Holographic arena boundary: clipped-corner plate and layered scan arcs.
-    final arenaWidth = math.min(size.width * 0.88, minDim * 0.88);
-    final arenaHeight = math.min(size.height * 0.53, minDim * 0.76);
-    final rect =
-        Rect.fromCenter(center: center, width: arenaWidth, height: arenaHeight);
-    final cut = minDim * 0.045;
-    final plate = Path()
-      ..moveTo(rect.left + cut, rect.top)
-      ..lineTo(rect.right - cut, rect.top)
-      ..lineTo(rect.right, rect.top + cut)
-      ..lineTo(rect.right, rect.bottom - cut)
-      ..lineTo(rect.right - cut, rect.bottom)
-      ..lineTo(rect.left + cut, rect.bottom)
-      ..lineTo(rect.left, rect.bottom - cut)
-      ..lineTo(rect.left, rect.top + cut)
-      ..close();
-    canvas.drawPath(
-      plate,
+    // Floating oval deck, layered to establish depth without a busy grid.
+    final deckGlow = Paint()
+      ..color = primary.withValues(alpha: 0.05 + energy * 0.035)
+      ..maskFilter = config.glow
+          ? MaskFilter.blur(BlurStyle.normal,
+              _safe(config.glowRadius, fallback: 8).clamp(1.0, 9.0))
+          : null;
+    canvas.drawOval(platform.inflate(minDim * 0.018), deckGlow);
+    canvas.drawOval(
+      platform,
       Paint()
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            accent.withValues(alpha: 0.055 + energy * 0.025),
-            Colors.transparent,
-            secondary.withValues(alpha: 0.035 + high * 0.025),
+            primary.withValues(alpha: 0.13 + energy * 0.04),
+            const Color(0xFF071421).withValues(alpha: 0.66),
+            cool.withValues(alpha: 0.10 + high * 0.04),
           ],
-        ).createShader(rect),
+        ).createShader(platform),
     );
-    if (config.glow) {
-      canvas.drawPath(
-        plate,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 5
-          ..color = accent.withValues(alpha: 0.10 + energy * 0.06)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal,
-              (config.glowRadius * 0.24).clamp(0.8, 4.0).toDouble()),
-      );
-    }
-    canvas.drawPath(
-      plate,
+    canvas.drawOval(
+      platform,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0
-        ..color = accent.withValues(alpha: 0.38 + energy * 0.22),
+        ..strokeWidth = 1
+        ..color = primary.withValues(alpha: 0.48 + energy * 0.2),
     );
-
-    // Corner brackets and moving scan bar communicate a game-interface frame.
-    final bracket = minDim * 0.055;
-    final bracketPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.square
-      ..color = Colors.white.withValues(alpha: 0.46 + energy * 0.20);
-    final corners = [
-      (Offset(rect.left, rect.top), 1.0, 1.0),
-      (Offset(rect.right, rect.top), -1.0, 1.0),
-      (Offset(rect.left, rect.bottom), 1.0, -1.0),
-      (Offset(rect.right, rect.bottom), -1.0, -1.0),
-    ];
-    for (final corner in corners) {
-      final origin = corner.$1;
-      final sx = corner.$2;
-      final sy = corner.$3;
-      canvas.drawLine(origin, origin + Offset(sx * bracket, 0), bracketPaint);
-      canvas.drawLine(origin, origin + Offset(0, sy * bracket), bracketPaint);
-    }
-    final scanY = rect.top + ((phase * 0.035) % 1.0) * rect.height;
-    canvas.drawLine(
-      Offset(rect.left + cut, scanY),
-      Offset(rect.right - cut, scanY),
+    final innerDeck = platform.deflate(minDim * 0.025);
+    canvas.drawOval(
+      innerDeck,
       Paint()
-        ..color = accent.withValues(alpha: 0.10 + energy * 0.08)
-        ..strokeWidth = 1.0,
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.7
+        ..color = cool.withValues(alpha: 0.22 + high * 0.12),
     );
 
-    // Reactor rings: bass drives radius, treble drives fine radial ticks.
-    final reactorRadius = minDim * (0.085 + bass * 0.035 + mid * 0.008);
-    for (var ring = 0; ring < 3; ring++) {
-      final radius = reactorRadius * (1.22 + ring * 0.48);
-      final color = ring.isEven ? accent : secondary;
-      final ringPaint = Paint()
+    // Three calibrated arc segments serve as readable arena instrumentation.
+    final dialR = minDim * (0.235 + bass * 0.016);
+    canvas.drawCircle(
+      center,
+      dialR,
+      Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = ring == 1 ? 1.3 : 0.8
-        ..color = color.withValues(alpha: 0.20 + energy * 0.12 + high * 0.06);
-      if (config.glow && ring == 1) {
-        final bloomPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 5
-          ..color = color.withValues(alpha: 0.10 + energy * 0.06)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal,
-              (config.glowRadius * 0.24).clamp(0.8, 4.0).toDouble());
-        canvas.drawCircle(center, radius, bloomPaint);
-      }
-      canvas.drawCircle(center, radius, ringPaint);
+        ..strokeWidth = 0.7
+        ..color = Colors.white.withValues(alpha: 0.10),
+    );
+    for (var i = 0; i < 3; i++) {
+      final r = dialR * (0.94 - i * 0.14);
+      final c = i == 1 ? cool : primary;
       canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        phase * (ring.isEven ? 0.12 : -0.09) + ring * 0.9,
-        math.pi * (0.52 + high * 0.20),
+        Rect.fromCircle(center: center, radius: r),
+        phase * (i.isEven ? 0.08 : -0.05) + i * 2.1,
+        math.pi * (0.54 + (i == 0 ? energy : high) * 0.22),
         false,
         Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0
+          ..strokeWidth = i == 1 ? 1.5 : 1
           ..strokeCap = StrokeCap.round
-          ..color = color.withValues(alpha: 0.52 + energy * 0.20),
+          ..color = c.withValues(alpha: 0.48 + energy * 0.22),
       );
     }
 
-    final bands = data.values;
-    if (bands.isNotEmpty && reactorRadius > 0) {
-      final tickCount = math.min(48, bands.length * 2).toInt();
-      final tickPaint = Paint()..strokeCap = StrokeCap.round;
-      for (var i = 0; i < tickCount; i++) {
-        final bandIndex =
-            (i * bands.length ~/ tickCount).clamp(0, bands.length - 1).toInt();
-        final value = _unit(bands[bandIndex]);
-        final angle = 2 * math.pi * i / tickCount - math.pi / 2 + phase * 0.018;
-        final inner = reactorRadius * 1.84;
-        final outer =
-            inner + minDim * (0.012 + value * 0.05 * config.intensity);
-        final a = center + Offset(math.cos(angle), math.sin(angle)) * inner;
-        final b = center + Offset(math.cos(angle), math.sin(angle)) * outer;
-        tickPaint
-          ..color = colorAt(i / tickCount, energy: energy, bass: bass)
-              .withValues(alpha: 0.28 + value * 0.62)
-          ..strokeWidth = 0.65 + value * 1.45;
-        canvas.drawLine(a, b, tickPaint);
-      }
+    // Evenly spaced calibration marks; longer marks at cardinal positions.
+    final tickPaint = Paint()
+      ..strokeWidth = 0.8
+      ..strokeCap = StrokeCap.round;
+    for (var i = 0; i < 48; i++) {
+      final angle = i * math.pi * 2 / 48 - math.pi / 2;
+      final major = i % 4 == 0;
+      final inner = dialR * (major ? 1.02 : 1.045);
+      final outer = dialR * (major ? 1.105 : 1.075);
+      tickPaint.color = (major ? Colors.white : primary)
+          .withValues(alpha: major ? 0.45 + energy * 0.12 : 0.25);
+      canvas.drawLine(
+        center + Offset(math.cos(angle), math.sin(angle)) * inner,
+        center + Offset(math.cos(angle), math.sin(angle)) * outer,
+        tickPaint,
+      );
     }
 
-    // Compact energy core with a narrow bloom, never a full-screen haze.
-    final coreRect =
-        Rect.fromCircle(center: center, radius: reactorRadius * 1.2);
+    // Spectrum columns sit along the front edge as a tidy arena readout.
+    final bands = data.values;
+    final count = math.min(32, bands.length);
+    if (count > 0) {
+      final width = platformW * 0.60;
+      final gap = math.max(1.0, minDim * 0.006);
+      final barW = (width - gap * (count - 1)) / count;
+      final baseY = platformY + platformH * 0.18;
+      final maxH =
+          math.min(platformH * 0.42, minDim * 0.13) * (0.7 + intensity * 0.3);
+      final barPaint = Paint();
+      for (var i = 0; i < count; i++) {
+        final value = _unit(bands[i]);
+        final eased = math.sqrt(value);
+        final h = maxH * (0.12 + eased * (0.45 + mid * 0.55));
+        final x = cx - width / 2 + i * (barW + gap);
+        final rect = Rect.fromLTWH(x, baseY - h, barW, h);
+        barPaint.shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            colorAt(i / math.max(1, count - 1), energy: energy, bass: bass)
+                .withValues(alpha: 0.88),
+            cool.withValues(alpha: 0.30),
+          ],
+        ).createShader(rect);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, Radius.circular(barW * 0.35)),
+          barPaint,
+        );
+      }
+      canvas.drawLine(
+        Offset(cx - width / 2, baseY + minDim * 0.012),
+        Offset(cx + width / 2, baseY + minDim * 0.012),
+        Paint()
+          ..strokeWidth = 0.7
+          ..color = primary.withValues(alpha: 0.35),
+      );
+    }
+
+    // Compact reactor: bass controls its pulse, treble adds a fine inner ring.
+    final coreR = minDim * (0.061 + bass * 0.018 + energy * 0.006);
+    final coreRect = Rect.fromCircle(center: center, radius: coreR * 1.8);
     if (config.glow) {
       canvas.drawCircle(
         center,
-        reactorRadius * 1.2,
+        coreR * 1.7,
         Paint()
           ..shader = RadialGradient(colors: [
-            accent.withValues(alpha: 0.18 + energy * 0.12),
-            secondary.withValues(alpha: 0.08 + high * 0.06),
+            primary.withValues(alpha: 0.22 + energy * 0.12),
+            cool.withValues(alpha: 0.10 + high * 0.07),
             Colors.transparent,
           ], stops: const [
-            0.0,
+            0,
             0.48,
-            1.0
+            1
           ]).createShader(coreRect)
           ..blendMode = BlendMode.screen,
       );
     }
     canvas.drawCircle(
       center,
-      reactorRadius * (0.36 + bass * 0.10),
+      coreR,
       Paint()
         ..shader = RadialGradient(colors: [
-          Colors.white.withValues(alpha: 0.88),
-          accent.withValues(alpha: 0.84),
-          secondary.withValues(alpha: 0.35),
+          Colors.white.withValues(alpha: 0.94),
+          primary.withValues(alpha: 0.94),
+          cool.withValues(alpha: 0.40),
         ], stops: const [
-          0.0,
-          0.38,
-          1.0
-        ]).createShader(
-          Rect.fromCircle(center: center, radius: reactorRadius * 0.62),
-        ),
+          0,
+          0.4,
+          1
+        ]).createShader(Rect.fromCircle(center: center, radius: coreR)),
+    );
+    canvas.drawCircle(
+      center,
+      coreR * (1.18 + high * 0.08),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8
+        ..color = Colors.white.withValues(alpha: 0.48 + high * 0.22),
+    );
+
+    // Low-contrast scan sweep across the reactor's instrument field.
+    final scanY =
+        center.dy - dialR + (((phase / (math.pi * 2)) % 1 + 1) % 1) * dialR * 2;
+    canvas.drawLine(
+      Offset(cx - dialR * 0.72, scanY),
+      Offset(cx + dialR * 0.72, scanY),
+      Paint()
+        ..strokeWidth = 0.65
+        ..color = cool.withValues(alpha: 0.10 + energy * 0.08),
     );
   }
+
+  double _safe(double value, {required double fallback}) =>
+      value.isFinite ? value : fallback;
 
   double _unit(double value) =>
       value.isFinite ? value.clamp(0.0, 1.0).toDouble() : 0.0;
